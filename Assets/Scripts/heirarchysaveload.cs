@@ -18,7 +18,7 @@ public class heirarchysaveload : MonoBehaviour
 {
     public GameObject nestedObject;
     private Transform allParent;
-    public TMP_Text nestedinfo;
+    public TMP_Text nestedInfo;
     public TMP_Text loadinfo;
     private bool record = false;
     private float timer = 0.0f;
@@ -79,7 +79,7 @@ public class heirarchysaveload : MonoBehaviour
                 if (elapsed >= 1f)
                 {
                     elapsed = elapsed % 1f;
-                    nestedinfo.text = "" + timer;
+                    nestedInfo.text = "" + timer;
                 }
                 if (infostring.Count >= 3000) // Couldn't see difference between 1k,2k,4k need HELP!
                 {
@@ -106,7 +106,7 @@ public class heirarchysaveload : MonoBehaviour
                 }
                 timer = 0;
                 record = false; 
-                nestedinfo.text = "Done Recording";
+                nestedInfo.text = "Done Recording";
                 binarywriter.Close();
                 fileStream.Close();
                 objectstracked.Clear();
@@ -115,6 +115,7 @@ public class heirarchysaveload : MonoBehaviour
         }
 
     }
+    
     // GUID in meta files for texture change
     private void writetodisk(int runcount) {
         for (int i = 0; i < (runcount/2); i++)
@@ -190,7 +191,7 @@ public class heirarchysaveload : MonoBehaviour
     {
         if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
         {
-            nestedinfo.text = "File exists: overwritten";
+            nestedInfo.text = "File exists: overwritten";
         }
 
         // writer = new StreamWriter(Application.persistentDataPath + "/storeloc.txt", false);

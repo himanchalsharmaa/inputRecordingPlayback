@@ -9,12 +9,18 @@ public class transformchangedcomp : MonoBehaviour
     private Vector3 rotation;
     private Vector3 scale;
     public List<GameObject> dicri;
-    
+    Material sharedMaterial;
+
     private void Start()
     {
         position = gameObject.transform.position;
         rotation = gameObject.transform.localEulerAngles;
         scale = gameObject.transform.localScale;
+        if (gameObject.GetComponent<MeshRenderer>())
+        {
+            sharedMaterial = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+        }
+        
     }
     void Update()
     {
@@ -25,6 +31,13 @@ public class transformchangedcomp : MonoBehaviour
             rotation = gameObject.transform.localEulerAngles;
             scale = gameObject.transform.localScale;
             //transform.hasChanged=false;
+        }
+        if (sharedMaterial != null)
+        {
+            if (sharedMaterial != gameObject.GetComponent<MeshRenderer>().sharedMaterial)
+            {
+                sharedMaterial = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+            }
         }
     }
 

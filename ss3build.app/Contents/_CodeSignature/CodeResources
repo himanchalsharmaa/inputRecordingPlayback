@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/Data/Managed/Assembly-CSharp.dll</key>
 		<data>
-		634MO6/Y/sz2h9WniRQP+hjm6ks=
+		8NXOtkO7pnNY1o04S73WlnxYAJU=
 		</data>
 		<key>Resources/Data/Managed/Microsoft.MixedReality.Toolkit.Async.dll</key>
 		<data>
@@ -578,7 +578,7 @@
 		</data>
 		<key>Resources/Data/globalgamemanagers</key>
 		<data>
-		dzhqwzqGmS9T7Ge2rqtd4VNWWzE=
+		3fDdl9RGmY6QzcxJpGJePwsVOhE=
 		</data>
 		<key>Resources/Data/globalgamemanagers.assets</key>
 		<data>
@@ -784,16 +784,16 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			zOTvvMZyIte5RWqigJP7Oqoexvo=
+			ys+Rnmy3Qg/UaE8HBMmHRAKM3Aw=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"cce4efbcc67222d7b9456aa28093fb3aaa1ec6fa" or cdhash H"e7cf32928af49db0ae96af67d6f5b618085356ad"</string>
+			<string>cdhash H"cacf919e6cb7420fd4684f0704c98744028cdc0c" or cdhash H"ed9c231c74b393a446b94ac98a7ef92268e66c2d"</string>
 		</dict>
 		<key>Resources/Data/Managed/Assembly-CSharp.dll</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			VTfv6Djl+of5Nvx7llFKXJef6cwW7mXAoRor2K5vHVM=
+			3SvfB8I+Z48W1Zf3dcGYN70W8R61k4znCoMTdK9eMCQ=
 			</data>
 		</dict>
 		<key>Resources/Data/Managed/Microsoft.MixedReality.Toolkit.Async.dll</key>
@@ -1794,7 +1794,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			ATmZZaJCyySjji4DGCqQ2KnSQ7i8S3Rbt+IY+qrw8wc=
+			DfA3yYWJJZ3nSo6fhKr/0Omjjjw2oIiE405E60EdL8U=
 			</data>
 		</dict>
 		<key>Resources/Data/globalgamemanagers.assets</key>
