@@ -30,6 +30,7 @@ public class heirarchysaveload : MonoBehaviour
     private FileStream fileStream;
     private ConcurrentQueue<string> infostring ;
     private List<GameObject> objectstracked = new List<GameObject>();
+    private string[] supportedsaves;
     private Dictionary<string, GameObject> aname;
     private int r,depth=0,j=0;
     private bool loaded = true;
@@ -42,6 +43,10 @@ public class heirarchysaveload : MonoBehaviour
     { //To set FPS to 60
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
+    }
+    private void Start()
+    {
+        supportedsaves =new string[3] { "_Metallic", "_Glossiness","_Color" };
     }
     private void Update()
     {
@@ -397,11 +402,13 @@ public class heirarchysaveload : MonoBehaviour
         { 
             transformchangedcomp tfc= gameObject.AddComponent<transformchangedcomp>();
             tfc.dicri =objectstracked;
+            tfc.supportedsaves = supportedsaves;
         }
         else
         {
             transformchangedcomp tfc = gameObject.AddComponent<transformchangedcomp>();
             tfc.dicri = objectstracked;
+            tfc.supportedsaves = supportedsaves;
         }
 
         foreach (Transform child in gameObject.transform)
@@ -411,6 +418,9 @@ public class heirarchysaveload : MonoBehaviour
             countObjectstracked(child.gameObject, indent, parentName, dicri);
         }
     }
+
+
+
 
 }
 

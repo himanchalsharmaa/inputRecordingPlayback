@@ -9,7 +9,8 @@ public class transformchangedcomp : MonoBehaviour
     private Vector3 rotation;
     private Vector3 scale;
     public List<GameObject> dicri;
-    Material sharedMaterial;
+    public string[] supportedsaves;
+    Material materialprop;
 
     private void Start()
     {
@@ -18,7 +19,7 @@ public class transformchangedcomp : MonoBehaviour
         scale = gameObject.transform.localScale;
         if (gameObject.GetComponent<MeshRenderer>())
         {
-            sharedMaterial = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+            materialprop = gameObject.GetComponent<MeshRenderer>().material;
         }
         
     }
@@ -32,11 +33,32 @@ public class transformchangedcomp : MonoBehaviour
             scale = gameObject.transform.localScale;
             //transform.hasChanged=false;
         }
-        if (sharedMaterial != null)
+        if (materialprop != null)
         {
-            if (sharedMaterial != gameObject.GetComponent<MeshRenderer>().sharedMaterial)
+            Material mata = gameObject.GetComponent<MeshRenderer>().material;
+            if (materialprop != mata)                   //Don't know yet if material comparison goes through everything property by property
             {
-                sharedMaterial = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+                if (materialprop.HasProperty("_Metallic"))
+                {
+                    Debug.Log("metallic: "+ materialprop.GetFloat("_Metallic"));
+                }
+                if (materialprop.HasProperty("_Glossiness"))
+                {
+                    Debug.Log("Glossiness: " + materialprop.GetFloat("_Glossiness"));
+                }
+                if (materialprop.HasProperty("_Color"))
+                {
+                    Debug.Log("Color: " + materialprop.GetColor("_Color"));
+                }
+                //for (int i = 0; i < supportedsaves.Length; i++)
+                //{
+
+                //    if (mata.HasProperty(supportedsaves[i]))
+                //    {
+                //        Debug.Log(mata.GetFloat(supportedsaves[i]));
+                //    }
+                //}
+                materialprop = mata;
             }
         }
     }
