@@ -29,7 +29,7 @@ public class heirarchysaveload : MonoBehaviour
     private BinaryReader binaryReader;
     private FileStream fileStream;
     private ConcurrentQueue<string> infostring ;
-    private List<GameObject> objectstracked = new List<GameObject>();
+    private List<Tuple<GameObject, bool>> objectstracked;
     private string[] supportedsaves;
     private Dictionary<string, GameObject> aname;
     private int r,depth=0,j=0;
@@ -60,11 +60,20 @@ public class heirarchysaveload : MonoBehaviour
             {
                 foreach (var item in objectstracked)
                 {
-                    string posi = ";" + item.transform.position.x + "," + item.transform.position.y + "," + item.transform.position.z + ";";
-                    string roti = item.transform.rotation.x + "," + item.transform.rotation.y + "," + item.transform.rotation.z + "," + item.transform.rotation.w + ";";
-                    string scaly = item.transform.localScale.x + "," + item.transform.localScale.y + "," + item.transform.localScale.z;
-                    string towrite = timer + posi + roti + scaly;
-                    GameObject obj = item;
+                    string posi = ";" + item.Item1.transform.position.x + "," + item.Item1.transform.position.y + "," + item.Item1.transform.position.z + ";";
+                    string roti = item.Item1.transform.rotation.x + "," + item.Item1.transform.rotation.y + "," + item.Item1.transform.rotation.z + "," + item.Item1.transform.rotation.w + ";";
+                    string scaly = item.Item1.transform.localScale.x + "," + item.Item1.transform.localScale.y + "," + item.Item1.transform.localScale.z+";";
+                    string matvalues="";
+                    if (item.Item2)
+                    {
+                        if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Metallic")) { }
+                    }
+                    else
+                    {
+                         matvalues ="0";
+                    }
+                    string towrite = timer + posi + roti + scaly+matvalues;
+                    GameObject obj = item.Item1;
                     string path = "" + obj.transform.GetSiblingIndex();
                     while (obj.transform.parent != allParent)
                     {
@@ -204,7 +213,7 @@ public class heirarchysaveload : MonoBehaviour
         fileStream = File.Open(filename, FileMode.Create);
         binarywriter = new BinaryWriter(fileStream);
         elapsed = 1f;
-        objectstracked = new List<GameObject>();
+        objectstracked = new List<Tuple<GameObject, bool>>();
         infostring = new ConcurrentQueue<string>();
         countObjectstracked(nestedObject, "/", "", objectstracked); // To Attach my script recursively to each child and send objectstrackd to each
         allParent = nestedObject.transform.parent;
@@ -382,7 +391,7 @@ public class heirarchysaveload : MonoBehaviour
         }
         return true;
     }
-    private void countObjectstracked(GameObject gameObject,string indent,string parentName,List<GameObject> dicri)
+    private void countObjectstracked(GameObject gameObject,string indent,string parentName, List<Tuple<GameObject, bool>> objectstracked)
     {
         if (gameObject.transform.childCount > 0)
         {
@@ -402,20 +411,20 @@ public class heirarchysaveload : MonoBehaviour
         { 
             transformchangedcomp tfc= gameObject.AddComponent<transformchangedcomp>();
             tfc.dicri =objectstracked;
-            tfc.supportedsaves = supportedsaves;
+      
         }
         else
         {
             transformchangedcomp tfc = gameObject.AddComponent<transformchangedcomp>();
             tfc.dicri = objectstracked;
-            tfc.supportedsaves = supportedsaves;
+  
         }
 
         foreach (Transform child in gameObject.transform)
         {
             if (!parentName.EndsWith("/"))
                 parentName = parentName + "/";
-            countObjectstracked(child.gameObject, indent, parentName, dicri);
+            countObjectstracked(child.gameObject, indent, parentName, objectstracked);
         }
     }
 
