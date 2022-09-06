@@ -125,12 +125,6 @@ public class heirarchysaveload : MonoBehaviour
                     {
                             diskwrite = Task.Factory.StartNew(() => writetodisk(infostring.Count));
                     }
-                    else
-                    {
-                        await diskwrite;
-                        diskwrite = Task.Factory.StartNew(() => writetodisk(infostring.Count));
-                        await diskwrite;
-                    }
                 }
                 timer += Time.deltaTime;
             }
