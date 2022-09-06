@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using static UnityEditor.Progress;
 
 public class transformchangedcomp : MonoBehaviour
 {
@@ -10,7 +9,10 @@ public class transformchangedcomp : MonoBehaviour
     private Vector3 rotation;
     private Vector3 scale;
     public List<Tuple<GameObject,bool>> dicri;
-    Material materialprop;
+    float meta=-1, glos=-1;
+    UnityEngine.Color color;
+    UnityEngine.Color defaultcol;
+    Material mata;
 
     private void Start()
     {
@@ -19,25 +21,50 @@ public class transformchangedcomp : MonoBehaviour
         scale = gameObject.transform.localScale;
         if (gameObject.GetComponent<MeshRenderer>())
         {
-            materialprop = gameObject.GetComponent<MeshRenderer>().material;
+            Material materialprop = gameObject.GetComponent<MeshRenderer>().material;
+            if (materialprop.HasProperty("_Metallic"))
+            {
+                meta = materialprop.GetFloat("_Metallic");
+            }
+            if (materialprop.HasProperty("_Glossiness"))
+            {
+                glos = materialprop.GetFloat("_Glossiness");
+            }
+            if (materialprop.HasProperty("_Color"))
+            {
+                color = materialprop.GetColor("_Color");
+            }
         }
         
     }
     void Update()
     {
+
         if (IsThereChangeInGameObject(gameObject.transform, gameObject.activeSelf, position, rotation, scale))
         {
             position = gameObject.transform.position;
             rotation = gameObject.transform.localEulerAngles;
             scale = gameObject.transform.localScale;
-            if (materialprop != null)
+            if (gameObject.GetComponent<MeshRenderer>())
             {
-                Material mata = gameObject.GetComponent<MeshRenderer>().material;
-                if (materialprop != mata)
+                mata = gameObject.GetComponent<MeshRenderer>().material;
+                if (meta != -1 && meta != mata.GetFloat("_Metallic"))
                 {
                     Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
                     dicri.Add(temp);
-                    materialprop = mata;
+                    meta = mata.GetFloat("_Metallic");
+                }
+                else if (glos != -1 && glos != mata.GetFloat("_Glossiness"))
+                {
+                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                    dicri.Add(temp);
+                    glos = mata.GetFloat("_Glossiness");
+                }
+                else if (color != defaultcol && color != mata.GetColor("_Color"))
+                {
+                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                    dicri.Add(temp);
+                    color = mata.GetColor("_Color");
                 }
                 else
                 {
@@ -51,13 +78,26 @@ public class transformchangedcomp : MonoBehaviour
                 dicri.Add(temp);
             }
         }
-        if (materialprop != null)
+        if (gameObject.GetComponent<MeshRenderer>())
         {
-            Material mata = gameObject.GetComponent<MeshRenderer>().material;
-            if (materialprop != mata)
+            mata = gameObject.GetComponent<MeshRenderer>().material;
+            if (meta != -1 && meta != mata.GetFloat("_Metallic"))
             {
                 Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
                 dicri.Add(temp);
+                meta = mata.GetFloat("_Metallic");
+            }
+            else if (glos != -1 && glos != mata.GetFloat("_Glossiness"))
+            {
+                Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                dicri.Add(temp);
+                glos = mata.GetFloat("_Glossiness");
+            }
+            else if (color != defaultcol && color != mata.GetColor("_Color"))
+            {
+                Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                dicri.Add(temp);
+                color = mata.GetColor("_Color");
             }
         }
     }

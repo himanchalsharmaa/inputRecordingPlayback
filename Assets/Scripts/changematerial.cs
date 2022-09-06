@@ -12,7 +12,8 @@ public class changematerial : MonoBehaviour
     public void colorchange()
     {
         changeinfo.text = "Beginning change";
-        tochange.GetComponent<MeshRenderer>().sharedMaterial = materiallist[1];
+        UnityEngine.Color col = new UnityEngine.Color(0,0,1,1);
+        tochange.GetComponent<MeshRenderer>().material.SetColor("_Color",col);
         changeinfo.text = "change done";
     }
 }

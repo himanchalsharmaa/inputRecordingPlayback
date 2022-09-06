@@ -14,7 +14,6 @@ using System.Linq;
 using static GLTFast.Schema.AnimationChannel;
 using System.Collections.Concurrent;
 using System.Drawing;
-using static UnityEditor.Progress;
 //COMMAND+R is replace all occurences
 public class heirarchysaveload : MonoBehaviour
 {
@@ -267,10 +266,10 @@ public class heirarchysaveload : MonoBehaviour
         elapsed = 1f;
         objectstracked = new List<Tuple<GameObject, bool>>();
         infostring = new ConcurrentQueue<string>();
-        countObjectstracked(nestedObject, "/", "", objectstracked,binarywriter); // To Attach my script recursively to each child and send objectstrackd to each
+        allParent = nestedObject.transform.parent;
+        countObjectstracked(nestedObject, "/", "", objectstracked,binarywriter, nestedObject); // To Attach my script recursively to each child and send objectstrackd to each
         binarywriter.Close();
         fileStream.Close();
-        allParent = nestedObject.transform.parent;
         if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
         {
             nestedInfo.text = "File exists: overwritten";
@@ -286,12 +285,20 @@ public class heirarchysaveload : MonoBehaviour
     {
         if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
         {
+            if (File.Exists(Application.persistentDataPath + "/snapshot.bin")) {
+                string snaploc = Application.persistentDataPath + "/snapshot.bin";
+                fileStream = File.Open(snaploc, FileMode.Open);
+                BinaryReader binaryreader = new BinaryReader(fileStream);
+                aname = new Dictionary<string, GameObject>();
+                allParent = nestedObject.transform.parent;
+                snapReader(binaryreader);
+                binaryreader.Close();
+                fileStream.Close();
+            }
             string filename = Application.persistentDataPath + "/storeloc.bin";
             fileStream = File.Open(filename, FileMode.Open);
             binaryReader = new BinaryReader(fileStream);
             ConcurrentQueue<string> loadstring = new ConcurrentQueue<string>();
-            aname = new Dictionary<string, GameObject>();
-            allParent = nestedObject.transform.parent;
             try
             {
                 diskread = Task.Factory.StartNew(() => loadfunction(binaryReader, loadstring));
@@ -487,11 +494,10 @@ public class heirarchysaveload : MonoBehaviour
             {
                 twice = true;
             }
-
         }
         return true;
     }
-    private void countObjectstracked(GameObject gameObject,string indent,string parentName, List<Tuple<GameObject, bool>> objectstracked,BinaryWriter binarywriter)
+    private void countObjectstracked(GameObject gameObject,string indent,string parentName, List<Tuple<GameObject, bool>> objectstracked,BinaryWriter binarywriter, GameObject allParent)
     {
         if (gameObject.transform.childCount > 0)
         {
@@ -511,34 +517,31 @@ public class heirarchysaveload : MonoBehaviour
         { 
             transformchangedcomp tfc= gameObject.AddComponent<transformchangedcomp>();
             tfc.dicri =objectstracked;
-            snapWriter(gameObject, binarywriter);
-
-
+            snapWriter(gameObject, gameObject, binarywriter,allParent);
         }
         else
         {
             transformchangedcomp tfc = gameObject.AddComponent<transformchangedcomp>();
             tfc.dicri = objectstracked;
-            snapWriter(gameObject, binarywriter);
-
+            snapWriter(gameObject, gameObject, binarywriter, allParent);
         }
 
         foreach (Transform child in gameObject.transform)
         {
             if (!parentName.EndsWith("/"))
                 parentName = parentName + "/";
-            countObjectstracked(child.gameObject, indent, parentName, objectstracked,binarywriter);
+            countObjectstracked(child.gameObject, indent, parentName, objectstracked,binarywriter, allParent);
         }
     }
-    private void snapWriter(GameObject obj,BinaryWriter binarywriter)
+    private void snapWriter(GameObject obj, GameObject obj1, BinaryWriter binarywriter, GameObject allparent)
     {
-        string path = "" + obj.transform.GetSiblingIndex();
-        int depth = 0;
-        while (obj.transform.parent != allParent)
+        string path = "" + obj1.transform.GetSiblingIndex();
+        int depth = 1;
+        while (obj1!=allparent) //obj.transform.parent != allparent && 
         {
             depth += 1;
-            obj = obj.transform.parent.gameObject;
-            path = obj.transform.GetSiblingIndex() + "," + path;
+            obj1 = obj1.transform.parent.gameObject;
+            path = obj1.transform.GetSiblingIndex() + "," + path;
         }
         path = depth + "," + path;
         string[] temp1 = path.Split(',');
@@ -546,69 +549,86 @@ public class heirarchysaveload : MonoBehaviour
         {
             binarywriter.Write(UInt16.Parse(temp1[j]));
         }
-        string matvalues = "";
         if (obj.GetComponent<MeshRenderer>())
         {
-            
             if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Metallic"))
             {
-                matvalues = matvalues + "1" + "," + obj.GetComponent<MeshRenderer>().material.GetFloat("_Metallic") + ";";
+                binarywriter.Write(true);
+                binarywriter.Write(obj.GetComponent<MeshRenderer>().material.GetFloat("_Metallic"));
             }
             else
             {
-                matvalues = matvalues + "0;";
+                binarywriter.Write(false);
             }
             if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
             {
-                matvalues = matvalues + "1" + "," + obj.GetComponent<MeshRenderer>().material.GetFloat("_Glossiness") + ";";
+                binarywriter.Write(true);
+                binarywriter.Write(obj.GetComponent<MeshRenderer>().material.GetFloat("_Glossiness"));
             }
             else
             {
-                matvalues = matvalues + "0;";
+                binarywriter.Write(false);
             }
             if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Color"))
             {
                 UnityEngine.Color coli = obj.GetComponent<MeshRenderer>().material.GetColor("_Color");
-                matvalues = matvalues + "1," + coli.r + "," + coli.g + "," + coli.b + "," + coli.a + ";";
+                binarywriter.Write(true);
+                binarywriter.Write(coli.r);
+                binarywriter.Write(coli.g);
+                binarywriter.Write(coli.b);
+                binarywriter.Write(coli.a);
             }
             else
             {
-                matvalues = matvalues + "0;";
+                binarywriter.Write(false);
             }
         }
-        string[] temp2 = matvalues.Split(';');
-        string[] metal = temp2[0].Split(',');
-        if (metal[0] == "1")
-        {
-            binarywriter.Write(true);
-            binarywriter.Write(float.Parse(metal[1]));
-        }
         else
         {
             binarywriter.Write(false);
-        }
-        string[] glos = temp2[1].Split(',');
-        if (glos[0] == "1")
-        {
-            binarywriter.Write(true);
-            binarywriter.Write(float.Parse(glos[1]));
-        }
-        else
-        {
             binarywriter.Write(false);
-        }
-        string[] col = temp2[2].Split(',');
-        if (col[0] == "1")
-        {
-            binarywriter.Write(true);
-            binarywriter.Write(float.Parse(col[1]));
-            binarywriter.Write(float.Parse(col[2]));
-            binarywriter.Write(float.Parse(col[3]));
-            binarywriter.Write(float.Parse(col[4]));
-        }
-        else
-        {
             binarywriter.Write(false);
+        }      
+    }
+    private void snapReader(BinaryReader binaryreader)
+    {
+        while (binaryreader.BaseStream.Position != binaryreader.BaseStream.Length)
+        {
+            GameObject go;
+            UInt16 deep = binaryreader.ReadUInt16();
+            string liny = "" + deep;
+            for (int j = 0; j < deep; j++)
+            {
+                liny = liny + "," + binaryreader.ReadUInt16();
+            }
+            string[] posi = liny.Split(',');
+            Transform t = allParent.GetChild(Int16.Parse(posi[1]));
+            if (aname.TryGetValue(liny, out go))
+            {
+                // Nothing
+            }
+            else
+            {
+                for (int x = 2; x < posi.Count(); x++)
+                {
+                    t = t.GetChild(Int16.Parse(posi[x]));
+                }
+                go = t.gameObject;
+                aname.Add(liny, go);
+            }
+            if (binaryreader.ReadBoolean())
+            {
+                go.GetComponent<MeshRenderer>().material.SetFloat("_Metallic", binaryreader.ReadSingle());
+            }
+            if (binaryreader.ReadBoolean())
+            {
+                go.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", binaryreader.ReadSingle());
+            }
+            if (binaryreader.ReadBoolean())
+            {
+                UnityEngine.Color color = new UnityEngine.Color(binaryreader.ReadSingle(), binaryreader.ReadSingle(), binaryreader.ReadSingle(), binaryreader.ReadSingle());
+                go.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+            }
         }
     }
 }
