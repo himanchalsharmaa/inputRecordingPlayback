@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using static UnityEditor.Progress;
 
 public class transformchangedcomp : MonoBehaviour
 {
@@ -24,8 +25,8 @@ public class transformchangedcomp : MonoBehaviour
     }
     void Update()
     {
-        if (IsThereChangeInGameObject(gameObject.transform,gameObject.activeSelf,position,rotation,scale)) 
-        {       
+        if (IsThereChangeInGameObject(gameObject.transform, gameObject.activeSelf, position, rotation, scale))
+        {
             position = gameObject.transform.position;
             rotation = gameObject.transform.localEulerAngles;
             scale = gameObject.transform.localScale;
@@ -34,22 +35,31 @@ public class transformchangedcomp : MonoBehaviour
                 Material mata = gameObject.GetComponent<MeshRenderer>().material;
                 if (materialprop != mata)
                 {
-                    Tuple<GameObject, bool> temp =new Tuple<GameObject, bool> (gameObject,true);
+                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
                     dicri.Add(temp);
                     materialprop = mata;
                 }
-                else {
-                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool> ( gameObject, false );
+                else
+                {
+                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, false);
                     dicri.Add(temp);
                 }
             }
             else
             {
-                Tuple<GameObject, bool> temp = new Tuple<GameObject, bool> ( gameObject, false );
+                Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, false);
                 dicri.Add(temp);
             }
         }
-        
+        if (materialprop != null)
+        {
+            Material mata = gameObject.GetComponent<MeshRenderer>().material;
+            if (materialprop != mata)
+            {
+                Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                dicri.Add(temp);
+            }
+        }
     }
 
     public static bool IsThereChangeInGameObject(Transform currentTransform, bool activeSelf, Vector3 position, Vector3 rotation, Vector3 scale)
