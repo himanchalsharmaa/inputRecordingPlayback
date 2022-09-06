@@ -14,6 +14,7 @@ using System.Linq;
 using static GLTFast.Schema.AnimationChannel;
 using System.Collections.Concurrent;
 using System.Drawing;
+using static UnityEditor.Progress;
 //COMMAND+R is replace all occurences
 public class heirarchysaveload : MonoBehaviour
 {
@@ -133,8 +134,6 @@ public class heirarchysaveload : MonoBehaviour
             {
                 if (infostring.Count > 1)
                 {
-                  //  Debug.Log(infostring.Count);
-                 //   Debug.Log(diskwrite.IsCompletedSuccessfully); // Editor was misbehaving and entering this twice for some reason
                     if(diskwrite.IsCompleted)
                     {
                         diskwrite = Task.Factory.StartNew(() => writetodisk(infostring.Count));
@@ -159,8 +158,6 @@ public class heirarchysaveload : MonoBehaviour
         }
 
     }
-    
-    // GUID in meta files for texture change
     private void writetodisk(int runcount) {
         for (int i = 0; i < (runcount/2); i++)
         {
@@ -262,30 +259,31 @@ public class heirarchysaveload : MonoBehaviour
             yield return null;
         }
     }
-    public async void storingobj()
+    public void storingobj()
     {
-        if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
-        {
-            nestedInfo.text = "File exists: overwritten";
-        }
-
-        // writer = new StreamWriter(Application.persistentDataPath + "/storeloc.txt", false);
-        string filename = Application.persistentDataPath + "/storeloc.bin";
-        fileStream = File.Open(filename, FileMode.Create);
+        string snaploc = Application.persistentDataPath + "/snapshot.bin";
+        fileStream = File.Open(snaploc, FileMode.Create);
         binarywriter = new BinaryWriter(fileStream);
         elapsed = 1f;
         objectstracked = new List<Tuple<GameObject, bool>>();
         infostring = new ConcurrentQueue<string>();
-        countObjectstracked(nestedObject, "/", "", objectstracked); // To Attach my script recursively to each child and send objectstrackd to each
+        countObjectstracked(nestedObject, "/", "", objectstracked,binarywriter); // To Attach my script recursively to each child and send objectstrackd to each
+        binarywriter.Close();
+        fileStream.Close();
         allParent = nestedObject.transform.parent;
+        if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
+        {
+            nestedInfo.text = "File exists: overwritten";
+        }
+        string filename = Application.persistentDataPath + "/storeloc.bin";
+        fileStream = File.Open(filename, FileMode.Create);
+        binarywriter = new BinaryWriter(fileStream);
         diskwrite = Task.Factory.StartNew(() => writetodisk(infostring.Count));
-        await diskwrite;
         record = true;
     }
 
     public async void callload()
     {
-
         if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
         {
             string filename = Application.persistentDataPath + "/storeloc.bin";
@@ -397,13 +395,11 @@ public class heirarchysaveload : MonoBehaviour
             if (metal[0] == "1")
             {
                 go.GetComponent<MeshRenderer>().material.SetFloat("_Metallic", float.Parse(metal[1], CultureInfo.InvariantCulture.NumberFormat));
-              //  Debug.Log(metal[1]);
             }
             string[] gloss = transforms[5].Split(',');
             if (gloss[0] == "1")
             {
                 go.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
-                //Debug.Log(gloss[1]);
             }
             string[] col = transforms[6].Split(',');
             if (col[0] == "1")
@@ -411,7 +407,6 @@ public class heirarchysaveload : MonoBehaviour
                 UnityEngine.Color color = new UnityEngine.Color(float.Parse(col[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[2], CultureInfo.InvariantCulture.NumberFormat)
                     ,float.Parse(col[3], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[4], CultureInfo.InvariantCulture.NumberFormat));
                 go.GetComponent<MeshRenderer>().material.SetColor("_Color",color );
-               Debug.Log(color);
             }
         }
     }
@@ -421,7 +416,6 @@ public class heirarchysaveload : MonoBehaviour
         bool twice = false;
         for (int i = 0; i < 2000; i++) 
         {
-
             if (once)
             {
                 if (binaryReader.PeekChar()!=-1)
@@ -497,7 +491,7 @@ public class heirarchysaveload : MonoBehaviour
         }
         return true;
     }
-    private void countObjectstracked(GameObject gameObject,string indent,string parentName, List<Tuple<GameObject, bool>> objectstracked)
+    private void countObjectstracked(GameObject gameObject,string indent,string parentName, List<Tuple<GameObject, bool>> objectstracked,BinaryWriter binarywriter)
     {
         if (gameObject.transform.childCount > 0)
         {
@@ -517,31 +511,107 @@ public class heirarchysaveload : MonoBehaviour
         { 
             transformchangedcomp tfc= gameObject.AddComponent<transformchangedcomp>();
             tfc.dicri =objectstracked;
-      
+            snapWriter(gameObject, binarywriter);
+
+
         }
         else
         {
             transformchangedcomp tfc = gameObject.AddComponent<transformchangedcomp>();
             tfc.dicri = objectstracked;
-  
+            snapWriter(gameObject, binarywriter);
+
         }
 
         foreach (Transform child in gameObject.transform)
         {
             if (!parentName.EndsWith("/"))
                 parentName = parentName + "/";
-            countObjectstracked(child.gameObject, indent, parentName, objectstracked);
+            countObjectstracked(child.gameObject, indent, parentName, objectstracked,binarywriter);
         }
     }
-
-
-
-
+    private void snapWriter(GameObject obj,BinaryWriter binarywriter)
+    {
+        string path = "" + obj.transform.GetSiblingIndex();
+        int depth = 0;
+        while (obj.transform.parent != allParent)
+        {
+            depth += 1;
+            obj = obj.transform.parent.gameObject;
+            path = obj.transform.GetSiblingIndex() + "," + path;
+        }
+        path = depth + "," + path;
+        string[] temp1 = path.Split(',');
+        for (int j = 0; j < UInt16.Parse(temp1[0]) + 1; j++)
+        {
+            binarywriter.Write(UInt16.Parse(temp1[j]));
+        }
+        string matvalues = "";
+        if (obj.GetComponent<MeshRenderer>())
+        {
+            
+            if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Metallic"))
+            {
+                matvalues = matvalues + "1" + "," + obj.GetComponent<MeshRenderer>().material.GetFloat("_Metallic") + ";";
+            }
+            else
+            {
+                matvalues = matvalues + "0;";
+            }
+            if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
+            {
+                matvalues = matvalues + "1" + "," + obj.GetComponent<MeshRenderer>().material.GetFloat("_Glossiness") + ";";
+            }
+            else
+            {
+                matvalues = matvalues + "0;";
+            }
+            if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Color"))
+            {
+                UnityEngine.Color coli = obj.GetComponent<MeshRenderer>().material.GetColor("_Color");
+                matvalues = matvalues + "1," + coli.r + "," + coli.g + "," + coli.b + "," + coli.a + ";";
+            }
+            else
+            {
+                matvalues = matvalues + "0;";
+            }
+        }
+        string[] temp2 = matvalues.Split(';');
+        string[] metal = temp2[0].Split(',');
+        if (metal[0] == "1")
+        {
+            binarywriter.Write(true);
+            binarywriter.Write(float.Parse(metal[1]));
+        }
+        else
+        {
+            binarywriter.Write(false);
+        }
+        string[] glos = temp2[1].Split(',');
+        if (glos[0] == "1")
+        {
+            binarywriter.Write(true);
+            binarywriter.Write(float.Parse(glos[1]));
+        }
+        else
+        {
+            binarywriter.Write(false);
+        }
+        string[] col = temp2[2].Split(',');
+        if (col[0] == "1")
+        {
+            binarywriter.Write(true);
+            binarywriter.Write(float.Parse(col[1]));
+            binarywriter.Write(float.Parse(col[2]));
+            binarywriter.Write(float.Parse(col[3]));
+            binarywriter.Write(float.Parse(col[4]));
+        }
+        else
+        {
+            binarywriter.Write(false);
+        }
+    }
 }
-
-
-
-
 //private void DumpGameObject(GameObject gameObject, StreamWriter writer, string indent, string parentName,List<string> infostring,float timer)
 //{
 //    if (gameObject.transform.childCount > 0)
