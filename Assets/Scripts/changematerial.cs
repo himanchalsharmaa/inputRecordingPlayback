@@ -18,12 +18,10 @@ public class changematerial : MonoBehaviour
         if (res == "Transparent")
         {
             tochange.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Opaque");
-
         }
         else if (res == "Opaque")
         {
             tochange.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Transparent");
-
         }
         changeinfo.text = "change done";
     }

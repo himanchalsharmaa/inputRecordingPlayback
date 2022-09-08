@@ -14,7 +14,6 @@ using System.Linq;
 using static GLTFast.Schema.AnimationChannel;
 using System.Collections.Concurrent;
 using System.Drawing;
-using static UnityEditor.Progress;
 //COMMAND+R is replace all occurences
 public class heirarchysaveload : MonoBehaviour
 {
@@ -353,16 +352,9 @@ public class heirarchysaveload : MonoBehaviour
                 }
 
                 if (loaded)
-                {
-                    try
-                    {
-                        diskread = Task.Factory.StartNew(() => loadfunction(binaryReader, loadstring));
-                        loaded = false;
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.Log(e);
-                    }
+                { 
+                diskread = Task.Factory.StartNew(() => loadfunction(binaryReader, loadstring));
+                loaded = false;
                 }
             }
             if (!loaded)
@@ -465,10 +457,7 @@ public class heirarchysaveload : MonoBehaviour
                     {
                         liny = liny + "," + binaryReader.ReadUInt16();
                     }
-                    if (liny != null)
-                    {
-                        loadstring.Enqueue(liny);
-                    }
+                    loadstring.Enqueue(liny);
                     twice = false;
                     once = false;
                 }
