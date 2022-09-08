@@ -14,6 +14,7 @@ using System.Linq;
 using static GLTFast.Schema.AnimationChannel;
 using System.Collections.Concurrent;
 using System.Drawing;
+using static UnityEditor.Progress;
 //COMMAND+R is replace all occurences
 public class heirarchysaveload : MonoBehaviour
 {
@@ -101,7 +102,7 @@ public class heirarchysaveload : MonoBehaviour
                     }
                     else
                     {
-                        matvalues = "0;0;0;";
+                        matvalues = "0;0;0;0;";
                     }
                     string towrite = timer + posi + roti + scaly + matvalues;
                     GameObject obj = item.Item1;
@@ -434,6 +435,18 @@ public class heirarchysaveload : MonoBehaviour
                     , float.Parse(col[3], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[4], CultureInfo.InvariantCulture.NumberFormat));
                 go.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
             }
+            string[] rend = transforms[7].Split(',');
+            if (rend[0] == "1")
+            {
+                if (rend[0] == "1")
+                {
+                    go.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Opaque");
+                }
+                else
+                {
+                    go.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Transparent");
+                }
+            }
         }
     }
     private bool loadfunction(BinaryReader binaryReader, ConcurrentQueue<string> loadstring)
@@ -614,9 +627,28 @@ public class heirarchysaveload : MonoBehaviour
             {
                 binarywriter.Write(false);
             }
+            string result = obj.GetComponent<MeshRenderer>().material.GetTag("RenderType", false, "N");
+            if (result != "N")
+            {
+                if (result == "Opaque")
+                {
+                    binarywriter.Write(true);
+                    binarywriter.Write(Convert.ToSByte(1));
+                }
+                if (result == "Transparent")
+                {
+                    binarywriter.Write(true);
+                    binarywriter.Write(Convert.ToSByte(2));
+                }
+            }
+            else
+            {
+                binarywriter.Write(false);
+            }
         }
         else
         {
+            binarywriter.Write(false);
             binarywriter.Write(false);
             binarywriter.Write(false);
             binarywriter.Write(false);
@@ -660,6 +692,18 @@ public class heirarchysaveload : MonoBehaviour
             {
                 UnityEngine.Color color = new UnityEngine.Color(binaryreader.ReadSingle(), binaryreader.ReadSingle(), binaryreader.ReadSingle(), binaryreader.ReadSingle());
                 go.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+            }
+            if (binaryreader.ReadBoolean())
+            {
+                SByte type = binaryreader.ReadSByte();
+                if (type == 1)
+                {
+                    go.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Opaque");
+                }
+                else
+                {
+                    go.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Transparent");
+                }               
             }
         }
     }
