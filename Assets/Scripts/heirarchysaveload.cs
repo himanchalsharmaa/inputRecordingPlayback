@@ -25,18 +25,15 @@ public class heirarchysaveload : MonoBehaviour
     private float timer = 0.0f;
     public float timetocapture = 4.0f;
     private float elapsed = 0.0f;
-    private bool playrecord = false;
     private BinaryWriter binarywriter;
     private BinaryReader binaryReader;
     private FileStream fileStream;
-    private ConcurrentQueue<string> infostring ;
+    private ConcurrentQueue<string> infostring;
     private List<Tuple<GameObject, bool>> objectstracked;
-    private string[] supportedsaves;
     private Dictionary<string, GameObject> aname;
-    private int r,depth=0,j=0;
+    private int  depth = 0;
     private bool loaded = true;
     private bool callquits = false;
-    private bool isrunning = false;
     private Task diskwrite;
     private Task<bool> diskread;
 
@@ -45,14 +42,7 @@ public class heirarchysaveload : MonoBehaviour
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
     }
-    private void Start()
-    {
-        supportedsaves =new string[3] { "_Metallic", "_Glossiness","_Color" };
-    }
-    private void Update()
-    {
 
-    }
     private async void LateUpdate()
     {
         if (record)
@@ -63,12 +53,13 @@ public class heirarchysaveload : MonoBehaviour
                 {
                     string posi = ";" + item.Item1.transform.position.x + "," + item.Item1.transform.position.y + "," + item.Item1.transform.position.z + ";";
                     string roti = item.Item1.transform.rotation.x + "," + item.Item1.transform.rotation.y + "," + item.Item1.transform.rotation.z + "," + item.Item1.transform.rotation.w + ";";
-                    string scaly = item.Item1.transform.localScale.x + "," + item.Item1.transform.localScale.y + "," + item.Item1.transform.localScale.z+";";
-                    string matvalues="";
+                    string scaly = item.Item1.transform.localScale.x + "," + item.Item1.transform.localScale.y + "," + item.Item1.transform.localScale.z + ";";
+                    string matvalues = "";
                     if (item.Item2)
                     {
-                        if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Metallic")) {
-                            matvalues= matvalues + "1" +","+item.Item1.GetComponent<MeshRenderer>().material.GetFloat("_Metallic")+";";
+                        if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Metallic"))
+                        {
+                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().material.GetFloat("_Metallic") + ";";
                         }
                         else
                         {
@@ -76,7 +67,7 @@ public class heirarchysaveload : MonoBehaviour
                         }
                         if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
                         {
-                            matvalues = matvalues+"1" + "," + item.Item1.GetComponent<MeshRenderer>().material.GetFloat("_Glossiness") + ";";
+                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().material.GetFloat("_Glossiness") + ";";
                         }
                         else
                         {
@@ -84,7 +75,7 @@ public class heirarchysaveload : MonoBehaviour
                         }
                         if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Color"))
                         {
-                            UnityEngine.Color col=item.Item1.GetComponent<MeshRenderer>().material.GetColor("_Color");
+                            UnityEngine.Color col = item.Item1.GetComponent<MeshRenderer>().material.GetColor("_Color");
                             matvalues = matvalues + "1," + col.r + "," + col.g + "," + col.b + "," + col.a + ";";
                         }
                         else
@@ -94,9 +85,9 @@ public class heirarchysaveload : MonoBehaviour
                     }
                     else
                     {
-                         matvalues ="0;0;0;";
+                        matvalues = "0;0;0;";
                     }
-                    string towrite = timer + posi + roti + scaly+matvalues;
+                    string towrite = timer + posi + roti + scaly + matvalues;
                     GameObject obj = item.Item1;
                     string path = "" + obj.transform.GetSiblingIndex();
                     while (obj.transform.parent != allParent)
@@ -123,7 +114,7 @@ public class heirarchysaveload : MonoBehaviour
                 {
                     if (diskwrite.IsCompleted)
                     {
-                            diskwrite = Task.Factory.StartNew(() => writetodisk(infostring.Count));
+                        diskwrite = Task.Factory.StartNew(() => writetodisk(infostring.Count));
                     }
                 }
                 timer += Time.deltaTime;
@@ -133,7 +124,7 @@ public class heirarchysaveload : MonoBehaviour
             {
                 if (infostring.Count > 1)
                 {
-                    if(diskwrite.IsCompleted)
+                    if (diskwrite.IsCompleted)
                     {
                         diskwrite = Task.Factory.StartNew(() => writetodisk(infostring.Count));
                         await diskwrite;
@@ -144,10 +135,10 @@ public class heirarchysaveload : MonoBehaviour
                         diskwrite = Task.Factory.StartNew(() => writetodisk(infostring.Count));
                         await diskwrite;
                     }
-          
+
                 }
                 timer = 0;
-                record = false; 
+                record = false;
                 nestedInfo.text = "Done Recording";
                 binarywriter.Close();
                 fileStream.Close();
@@ -157,10 +148,11 @@ public class heirarchysaveload : MonoBehaviour
         }
 
     }
-    private void writetodisk(int runcount) {
-        for (int i = 0; i < (runcount/2); i++)
+    private void writetodisk(int runcount)
+    {
+        for (int i = 0; i < (runcount / 2); i++)
         {
-            string a,b;
+            string a, b;
             infostring.TryDequeue(out a);
             string[] temp1 = a.Split(',');
             for (int j = 0; j < UInt16.Parse(temp1[0]) + 1; j++)
@@ -168,7 +160,7 @@ public class heirarchysaveload : MonoBehaviour
                 binarywriter.Write(UInt16.Parse(temp1[j]));
             }
             infostring.TryDequeue(out b);
-            string[] temp2 = b.Split(';');                              
+            string[] temp2 = b.Split(';');
             binarywriter.Write(float.Parse(temp2[0]));
             string[] posarr = temp2[1].Split(',');
             binarywriter.Write(float.Parse(posarr[0]));
@@ -246,7 +238,7 @@ public class heirarchysaveload : MonoBehaviour
                 timer += Time.deltaTime;
             }
             else
-            {     
+            {
                 timer = 0;
                 aname.Clear();
                 binaryReader.Close();
@@ -267,7 +259,7 @@ public class heirarchysaveload : MonoBehaviour
         objectstracked = new List<Tuple<GameObject, bool>>();
         infostring = new ConcurrentQueue<string>();
         allParent = nestedObject.transform.parent;
-        countObjectstracked(nestedObject, "/", "", objectstracked,binarywriter, nestedObject); // To Attach my script recursively to each child and send objectstrackd to each
+        countObjectstracked(nestedObject, "/", "", objectstracked, binarywriter, nestedObject); // To Attach my script recursively to each child and send objectstrackd to each
         binarywriter.Close();
         fileStream.Close();
         if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
@@ -285,7 +277,8 @@ public class heirarchysaveload : MonoBehaviour
     {
         if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
         {
-            if (File.Exists(Application.persistentDataPath + "/snapshot.bin")) {
+            if (File.Exists(Application.persistentDataPath + "/snapshot.bin"))
+            {
                 string snaploc = Application.persistentDataPath + "/snapshot.bin";
                 fileStream = File.Open(snaploc, FileMode.Open);
                 BinaryReader binaryreader = new BinaryReader(fileStream);
@@ -305,7 +298,7 @@ public class heirarchysaveload : MonoBehaviour
                 await diskread;
                 loaded = diskread.Result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.Log(e);
             }
@@ -319,10 +312,10 @@ public class heirarchysaveload : MonoBehaviour
             loadinfo.text = "No load exists";
         }
     }
-    public void loadingobj(BinaryReader reader,Dictionary<string,GameObject> aname, ConcurrentQueue<string> loadstring)
+    public void loadingobj(BinaryReader reader, Dictionary<string, GameObject> aname, ConcurrentQueue<string> loadstring)
     {
-        float timothy1=0, timothy2;
-        bool oncy=true;
+        float timothy1 = 0, timothy2;
+        bool oncy = true;
         while (true)
         {
             if (loadstring.Count < 500) //Leaves 4-5 seconds for thread to complete
@@ -347,29 +340,29 @@ public class heirarchysaveload : MonoBehaviour
             }
             if (!loaded)
             {
-                    if (loadstring.Count==0)
-                    {
+                if (loadstring.Count == 0)
+                {
                     break;
-                    }
+                }
             }
             string line, toread;
             loadstring.TryDequeue(out line);
             GameObject go;
             Transform t;
             string[] posi = line.Split(',');
-            t=allParent.GetChild(Int16.Parse(posi[1]));
-            if (aname.TryGetValue(line,out go))
-                {
-                    // Nothing
-                }
+            t = allParent.GetChild(Int16.Parse(posi[1]));
+            if (aname.TryGetValue(line, out go))
+            {
+                // Nothing
+            }
             else
             {
-                for(int x = 2; x < posi.Count(); x++)
+                for (int x = 2; x < posi.Count(); x++)
                 {
-                    t=t.GetChild(Int16.Parse(posi[x]));
+                    t = t.GetChild(Int16.Parse(posi[x]));
                 }
                 go = t.gameObject;
-                aname.Add(line,go);
+                aname.Add(line, go);
             }
             loadstring.TryDequeue(out toread);
             string[] transforms = toread.Split(';');
@@ -412,8 +405,8 @@ public class heirarchysaveload : MonoBehaviour
             if (col[0] == "1")
             {
                 UnityEngine.Color color = new UnityEngine.Color(float.Parse(col[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[2], CultureInfo.InvariantCulture.NumberFormat)
-                    ,float.Parse(col[3], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[4], CultureInfo.InvariantCulture.NumberFormat));
-                go.GetComponent<MeshRenderer>().material.SetColor("_Color",color );
+                    , float.Parse(col[3], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[4], CultureInfo.InvariantCulture.NumberFormat));
+                go.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
             }
         }
     }
@@ -421,11 +414,11 @@ public class heirarchysaveload : MonoBehaviour
     {
         bool once = true;
         bool twice = false;
-        for (int i = 0; i < 2000; i++) 
+        for (int i = 0; i < 2000; i++)
         {
             if (once)
             {
-                if (binaryReader.PeekChar()!=-1)
+                if (binaryReader.PeekChar() != -1)
                 {
                     UInt16 deep = binaryReader.ReadUInt16();
                     string liny = "" + deep;
@@ -440,24 +433,24 @@ public class heirarchysaveload : MonoBehaviour
                     twice = false;
                     once = false;
                 }
-                else 
+                else
                 {
-                     //PeekChar is supposedly unreliable but try catch blocks are extremely slow when done 1000s of times
+                    //PeekChar is supposedly unreliable but try catch blocks are extremely slow when done 1000s of times
                     return false;
                 }
-                
+
             }
             if (twice)
             {
                 string timer = binaryReader.ReadSingle() + ";";
                 string posi = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
                 string roti = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
-                string scali = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle()+";";
+                string scali = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
                 string matvalues = "";
                 bool met = binaryReader.ReadBoolean();
                 if (met)
                 {
-                    matvalues = matvalues + "1," + binaryReader.ReadSingle()+";";
+                    matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
                 }
                 else
                 {
@@ -475,7 +468,7 @@ public class heirarchysaveload : MonoBehaviour
                 bool col = binaryReader.ReadBoolean();
                 if (col)
                 {
-                    matvalues = matvalues + "1," + binaryReader.ReadSingle()+","+ binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle()+";";
+                    matvalues = matvalues + "1," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
                 }
                 else
                 {
@@ -497,7 +490,7 @@ public class heirarchysaveload : MonoBehaviour
         }
         return true;
     }
-    private void countObjectstracked(GameObject gameObject,string indent,string parentName, List<Tuple<GameObject, bool>> objectstracked,BinaryWriter binarywriter, GameObject allParent)
+    private void countObjectstracked(GameObject gameObject, string indent, string parentName, List<Tuple<GameObject, bool>> objectstracked, BinaryWriter binarywriter, GameObject allParent)
     {
         if (gameObject.transform.childCount > 0)
         {
@@ -514,10 +507,10 @@ public class heirarchysaveload : MonoBehaviour
         }
 
         if (parentName.EndsWith("/"))
-        { 
-            transformchangedcomp tfc= gameObject.AddComponent<transformchangedcomp>();
-            tfc.dicri =objectstracked;
-            snapWriter(gameObject, gameObject, binarywriter,allParent);
+        {
+            transformchangedcomp tfc = gameObject.AddComponent<transformchangedcomp>();
+            tfc.dicri = objectstracked;
+            snapWriter(gameObject, gameObject, binarywriter, allParent);
         }
         else
         {
@@ -530,14 +523,14 @@ public class heirarchysaveload : MonoBehaviour
         {
             if (!parentName.EndsWith("/"))
                 parentName = parentName + "/";
-            countObjectstracked(child.gameObject, indent, parentName, objectstracked,binarywriter, allParent);
+            countObjectstracked(child.gameObject, indent, parentName, objectstracked, binarywriter, allParent);
         }
     }
     private void snapWriter(GameObject obj, GameObject obj1, BinaryWriter binarywriter, GameObject allparent)
     {
         string path = "" + obj1.transform.GetSiblingIndex();
         int depth = 1;
-        while (obj1!=allparent) //obj.transform.parent != allparent && 
+        while (obj1 != allparent) //obj.transform.parent != allparent && 
         {
             depth += 1;
             obj1 = obj1.transform.parent.gameObject;
@@ -588,7 +581,7 @@ public class heirarchysaveload : MonoBehaviour
             binarywriter.Write(false);
             binarywriter.Write(false);
             binarywriter.Write(false);
-        }      
+        }
     }
     private void snapReader(BinaryReader binaryreader)
     {

@@ -8,11 +8,13 @@ public class transformchangedcomp : MonoBehaviour
     private Vector3 position;
     private Vector3 rotation;
     private Vector3 scale;
-    public List<Tuple<GameObject,bool>> dicri;
-    float meta=-1, glos=-1;
+    public List<Tuple<GameObject, bool>> dicri;
+    float meta = -1, glos = -1;
     UnityEngine.Color color;
     UnityEngine.Color defaultcol;
     Material mata;
+    string result = "N", reType = "N";
+    private bool changed = false;
 
     private void Start()
     {
@@ -34,8 +36,12 @@ public class transformchangedcomp : MonoBehaviour
             {
                 color = materialprop.GetColor("_Color");
             }
+            result = materialprop.GetTag("RenderType", false, "N");
+            if (result != "N")
+            {
+                reType = result;
+            }
         }
-        
     }
     void Update()
     {
@@ -48,49 +54,48 @@ public class transformchangedcomp : MonoBehaviour
             if (gameObject.GetComponent<MeshRenderer>())
             {
                 mata = gameObject.GetComponent<MeshRenderer>().material;
+                if (reType!="N")
+                {
+                    result = mata.GetTag("RenderType", false, "N");
+                    if (reType != result)
+                    {
+                        Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                        dicri.Add(temp);
+                        reType = result;
+                        changed = true;
+                    }
+                }
                 if (meta != -1 && meta != mata.GetFloat("_Metallic"))
                 {
-                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
-                    dicri.Add(temp);
+                    if (!changed)
+                    {
+                        Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                        dicri.Add(temp);
+                        changed = true;
+                    }
                     meta = mata.GetFloat("_Metallic");
-                    if(glos != -1)
-                    {
-                        glos = mata.GetFloat("_Glossiness");
-                    }
-                    if(color != defaultcol)
-                    {
-                        color = mata.GetColor("_Color");
-                    }
                 }
-                else if (glos != -1 && glos != mata.GetFloat("_Glossiness"))
+                if (glos != -1 && glos != mata.GetFloat("_Glossiness"))
                 {
-                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
-                    dicri.Add(temp);
+                    if (!changed)
+                    {
+                        Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                        dicri.Add(temp);
+                        changed = true;
+                    }
                     glos = mata.GetFloat("_Glossiness");
-                    if (meta != -1)
-                    {
-                        meta = mata.GetFloat("_Metallic");
-                    }
-                    if (color != defaultcol)
-                    {
-                        color = mata.GetColor("_Color");
-                    }
                 }
-                else if (color != defaultcol && color != mata.GetColor("_Color"))
+                if (color != defaultcol && color != mata.GetColor("_Color"))
                 {
-                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
-                    dicri.Add(temp);
+                    if (!changed)
+                    {
+                        Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                        dicri.Add(temp);
+                        changed = true;
+                    }
                     color = mata.GetColor("_Color");
-                    if (meta != -1)
-                    {
-                        meta = mata.GetFloat("_Metallic");
-                    }
-                    if (glos != -1)
-                    {
-                        glos = mata.GetFloat("_Glossiness");
-                    }
                 }
-                else
+                if(!changed)
                 {
                     Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, false);
                     dicri.Add(temp);
@@ -101,52 +106,52 @@ public class transformchangedcomp : MonoBehaviour
                 Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, false);
                 dicri.Add(temp);
             }
+            changed = false;
         }
-        if (gameObject.GetComponent<MeshRenderer>())
+        else if (gameObject.GetComponent<MeshRenderer>())
         {
             mata = gameObject.GetComponent<MeshRenderer>().material;
+            if (reType != "N")
+            {
+                result = mata.GetTag("RenderType", false, "N");
+                if (reType != result)
+                {
+                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                    dicri.Add(temp);
+                    reType = result;
+                    changed = true;
+                }
+            }
             if (meta != -1 && meta != mata.GetFloat("_Metallic"))
             {
-                Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
-                dicri.Add(temp);
+                if (!changed)
+                {
+                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                    dicri.Add(temp);
+                    changed = true;
+                }
                 meta = mata.GetFloat("_Metallic");
-                if (glos != -1)
-                {
-                    glos = mata.GetFloat("_Glossiness");
-                }
-                if (color != defaultcol)
-                {
-                    color = mata.GetColor("_Color");
-                }
             }
-            else if (glos != -1 && glos != mata.GetFloat("_Glossiness"))
+            if (glos != -1 && glos != mata.GetFloat("_Glossiness"))
             {
-                Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
-                dicri.Add(temp);
+                if (!changed)
+                {
+                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                    dicri.Add(temp);
+                    changed = true;
+                }
                 glos = mata.GetFloat("_Glossiness");
-                if (meta != -1)
-                {
-                    meta = mata.GetFloat("_Metallic");
-                }
-                if (color != defaultcol)
-                {
-                    color = mata.GetColor("_Color");
-                }
             }
-            else if (color != defaultcol && color != mata.GetColor("_Color"))
+            if (color != defaultcol && color != mata.GetColor("_Color"))
             {
-                Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
-                dicri.Add(temp);
+                if (!changed)
+                {
+                    Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                    dicri.Add(temp);
+                }
                 color = mata.GetColor("_Color");
-                if (meta != -1)
-                {
-                    meta = mata.GetFloat("_Metallic");
-                }
-                if (glos != -1)
-                {
-                    glos = mata.GetFloat("_Glossiness");
-                }
             }
+            changed = false;
         }
     }
 
