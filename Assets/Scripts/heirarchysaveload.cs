@@ -82,6 +82,22 @@ public class heirarchysaveload : MonoBehaviour
                         {
                             matvalues = matvalues + "0;";
                         }
+                        string result = item.Item1.GetComponent<MeshRenderer>().material.GetTag("RenderType", false, "N");
+                        if (result != "N")
+                        {
+                            if (result == "Opaque")
+                            {
+                                matvalues = matvalues + "1,1;";
+                            }
+                            if (result == "Transparent")
+                            {
+                                matvalues = matvalues + "1,2;";
+                            }
+                        }
+                        else
+                        {
+                            matvalues = matvalues + "0;";
+                        }
                     }
                     else
                     {
@@ -207,6 +223,16 @@ public class heirarchysaveload : MonoBehaviour
             else
             {
                 binarywriter.Write(false);
+            }
+            string[] rend = temp2[7].Split(',');
+            if (rend[0] == "1")
+            {
+                binarywriter.Write(true);
+                binarywriter.Write(Convert.ToSByte(rend[1]));
+            }
+            else
+            {
+               binarywriter.Write(false);
             }
         }
     }
@@ -447,8 +473,7 @@ public class heirarchysaveload : MonoBehaviour
                 string roti = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
                 string scali = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
                 string matvalues = "";
-                bool met = binaryReader.ReadBoolean();
-                if (met)
+                if (binaryReader.ReadBoolean())
                 {
                     matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
                 }
@@ -456,8 +481,7 @@ public class heirarchysaveload : MonoBehaviour
                 {
                     matvalues = matvalues + "0;";
                 }
-                bool glos = binaryReader.ReadBoolean();
-                if (glos)
+                if (binaryReader.ReadBoolean())
                 {
                     matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
                 }
@@ -465,10 +489,25 @@ public class heirarchysaveload : MonoBehaviour
                 {
                     matvalues = matvalues + "0;";
                 }
-                bool col = binaryReader.ReadBoolean();
-                if (col)
+                if (binaryReader.ReadBoolean())
                 {
                     matvalues = matvalues + "1," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
+                }
+                else
+                {
+                    matvalues = matvalues + "0;";
+                }
+                if (binaryReader.ReadBoolean())
+                {
+                    SByte type = binaryReader.ReadSByte();
+                    if (type == 1)
+                    {
+                        matvalues = matvalues + "1,1;";
+                    }
+                    else if (type == 2)
+                    {
+                        matvalues = matvalues + "1,2;";
+                    }
                 }
                 else
                 {

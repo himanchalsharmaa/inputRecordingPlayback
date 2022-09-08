@@ -15,16 +15,15 @@ public class changematerial : MonoBehaviour
         UnityEngine.Color col = new UnityEngine.Color(0,0,1,1);
         tochange.GetComponent<MeshRenderer>().material.SetColor("_Color",col);
         string res= tochange.GetComponent<MeshRenderer>().material.GetTag("RenderType", false, "N");
-        Debug.Log(res);
         if (res == "Transparent")
         {
             tochange.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Opaque");
-            Debug.Log("Set to Opaque");
+
         }
         else if (res == "Opaque")
         {
             tochange.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Transparent");
-            Debug.Log("Set to Transparent");
+
         }
         changeinfo.text = "change done";
     }

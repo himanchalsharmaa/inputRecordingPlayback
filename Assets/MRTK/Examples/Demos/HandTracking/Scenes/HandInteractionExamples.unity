@@ -25098,7 +25098,7 @@ MonoBehaviour:
   nestedObject: {fileID: 1717458035}
   nestedInfo: {fileID: 907054780}
   loadinfo: {fileID: 549347766}
-  timetocapture: 10
+  timetocapture: 7
 --- !u!114 &1717458039
 MonoBehaviour:
   m_ObjectHideFlags: 0
