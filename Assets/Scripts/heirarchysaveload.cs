@@ -30,7 +30,7 @@ public class heirarchysaveload : MonoBehaviour
     private BinaryReader binaryReader;
     private FileStream fileStream;
     private ConcurrentQueue<string> infostring;
-    private List<Tuple<GameObject, bool>> objectstracked;
+    private List<Tuple<GameObject, bool,Byte>> objectstracked;
     private Dictionary<string, GameObject> aname;
     private int  depth = 0;
     private bool loaded = true;
@@ -58,36 +58,37 @@ public class heirarchysaveload : MonoBehaviour
                     string matvalues = "";
                     if (item.Item2)
                     {
-                        if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Metallic"))
+                        matvalues = matvalues + "1," + item.Item3 + ";";
+                        if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Metallic"))
                         {
-                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().material.GetFloat("_Metallic") + ";";
+                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetFloat("_Metallic") + ";";
                         }
                         else
                         {
                             matvalues = matvalues + "0;";
                         }
-                        if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
+                        if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Glossiness"))
                         {
-                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().material.GetFloat("_Glossiness") + ";";
+                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetFloat("_Glossiness") + ";";
                         }
-                        else if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Smoothness"))
+                        else if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Smoothness"))
                         {
-                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().material.GetFloat("_Smoothness") + ";";
+                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetFloat("_Smoothness") + ";";
                         }
                         else
                         {
                             matvalues = matvalues + "0;";
                         }
-                        if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Color"))
+                        if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Color"))
                         {
-                            UnityEngine.Color col = item.Item1.GetComponent<MeshRenderer>().material.GetColor("_Color");
+                            UnityEngine.Color col = item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetColor("_Color");
                             matvalues = matvalues + "1," + col.r + "," + col.g + "," + col.b + "," + col.a + ";";
                         }
                         else
                         {
                             matvalues = matvalues + "0;";
                         }
-                        string result = item.Item1.GetComponent<MeshRenderer>().material.GetTag("RenderType", false, "N");
+                        string result = item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetTag("RenderType", false, "N");
                         if (result != "N")
                         {
                             if (result == "Opaque")
@@ -106,7 +107,7 @@ public class heirarchysaveload : MonoBehaviour
                     }
                     else
                     {
-                        matvalues = "0;0;0;0;";
+                        matvalues = "0;";
                     }
                     string towrite = timer + posi + roti + scaly + matvalues;
                     GameObject obj = item.Item1;
@@ -196,49 +197,62 @@ public class heirarchysaveload : MonoBehaviour
             binarywriter.Write(float.Parse(scalearr[0]));
             binarywriter.Write(float.Parse(scalearr[1]));
             binarywriter.Write(float.Parse(scalearr[2]));
-            string[] metal = temp2[4].Split(',');
-            if (metal[0] == "1")
+            string[] matnum= temp2[4].Split(',');
+            if (matnum[0] == "1")
             {
                 binarywriter.Write(true);
-                binarywriter.Write(float.Parse(metal[1]));
+                binarywriter.Write(Byte.Parse(matnum[1]));
+
+                string[] metal = temp2[5].Split(',');
+                if (metal[0] == "1")
+                {
+                    binarywriter.Write(true);
+                    binarywriter.Write(float.Parse(metal[1]));
+                }
+                else
+                {
+                    binarywriter.Write(false);
+                }
+                string[] glos = temp2[6].Split(',');
+                if (glos[0] == "1")
+                {
+                    binarywriter.Write(true);
+                    binarywriter.Write(float.Parse(glos[1]));
+                }
+                else
+                {
+                    binarywriter.Write(false);
+                }
+                string[] col = temp2[7].Split(',');
+                if (col[0] == "1")
+                {
+                    binarywriter.Write(true);
+                    binarywriter.Write(float.Parse(col[1]));
+                    binarywriter.Write(float.Parse(col[2]));
+                    binarywriter.Write(float.Parse(col[3]));
+                    binarywriter.Write(float.Parse(col[4]));
+                }
+                else
+                {
+                    binarywriter.Write(false);
+                }
+                string[] rend = temp2[8].Split(',');
+                if (rend[0] == "1")
+                {
+                    binarywriter.Write(true);
+                    binarywriter.Write(Convert.ToSByte(rend[1]));
+                }
+                else
+                {
+                    binarywriter.Write(false);
+                }
+
             }
             else
             {
                 binarywriter.Write(false);
             }
-            string[] glos = temp2[5].Split(',');
-            if (glos[0] == "1")
-            {
-                binarywriter.Write(true);
-                binarywriter.Write(float.Parse(glos[1]));
-            }
-            else
-            {
-                binarywriter.Write(false);
-            }
-            string[] col = temp2[6].Split(',');
-            if (col[0] == "1")
-            {
-                binarywriter.Write(true);
-                binarywriter.Write(float.Parse(col[1]));
-                binarywriter.Write(float.Parse(col[2]));
-                binarywriter.Write(float.Parse(col[3]));
-                binarywriter.Write(float.Parse(col[4]));
-            }
-            else
-            {
-                binarywriter.Write(false);
-            }
-            string[] rend = temp2[7].Split(',');
-            if (rend[0] == "1")
-            {
-                binarywriter.Write(true);
-                binarywriter.Write(Convert.ToSByte(rend[1]));
-            }
-            else
-            {
-               binarywriter.Write(false);
-            }
+            
         }
     }
 
@@ -287,7 +301,7 @@ public class heirarchysaveload : MonoBehaviour
         fileStream = File.Open(snaploc, FileMode.Create);
         binarywriter = new BinaryWriter(fileStream);
         elapsed = 1f;
-        objectstracked = new List<Tuple<GameObject, bool>>();
+        objectstracked = new List<Tuple<GameObject, bool,Byte>>();
         infostring = new ConcurrentQueue<string>();
         allParent = nestedObject.transform.parent;
         countObjectstracked(nestedObject, "/", "", objectstracked, binarywriter, nestedObject); // To Attach my script recursively to each child and send objectstrackd to each
@@ -383,7 +397,10 @@ public class heirarchysaveload : MonoBehaviour
             {
                 for (int x = 2; x < posi.Count(); x++)
                 {
-                    t = t.GetChild(Int16.Parse(posi[x]));
+                    if (Int16.Parse(posi[x]) <= t.childCount)
+                    {
+                        t = t.GetChild(Int16.Parse(posi[x]));
+                    }
                 }
                 go = t.gameObject;
                 aname.Add(line, go);
@@ -415,42 +432,48 @@ public class heirarchysaveload : MonoBehaviour
             go.transform.position = pos;
             go.transform.rotation = rot;
             go.transform.localScale = scale;
-            string[] metal = transforms[4].Split(',');
-            if (metal[0] == "1")
+            string[] matnum = transforms[4].Split(',');
+            Material gomat;
+            if (matnum[0]=="1")
             {
-                go.GetComponent<MeshRenderer>().material.SetFloat("_Metallic", float.Parse(metal[1], CultureInfo.InvariantCulture.NumberFormat));
-            }
-            string[] gloss = transforms[5].Split(',');
-            if (gloss[0] == "1")
-            {
-                if (go.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
+                gomat = go.GetComponent<MeshRenderer>().materials[Byte.Parse(matnum[1])];
+                string[] metal = transforms[5].Split(',');
+                if (metal[0] == "1")
                 {
-                    go.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                    gomat.SetFloat("_Metallic", float.Parse(metal[1], CultureInfo.InvariantCulture.NumberFormat));
                 }
-                else
+                string[] gloss = transforms[6].Split(',');
+                if (gloss[0] == "1")
                 {
-                    go.GetComponent<MeshRenderer>().material.SetFloat("_Smoothness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                    if (gomat.HasProperty("_Glossiness"))
+                    {
+                        gomat.SetFloat("_Glossiness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                    }
+                    else
+                    {
+                        gomat.SetFloat("_Smoothness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                    }
                 }
-            }
-            string[] col = transforms[6].Split(',');
-            if (col[0] == "1")
-            {
-                UnityEngine.Color color = new UnityEngine.Color(float.Parse(col[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[2], CultureInfo.InvariantCulture.NumberFormat)
-                    , float.Parse(col[3], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[4], CultureInfo.InvariantCulture.NumberFormat));
-                go.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
-            }
-            string[] rend = transforms[7].Split(',');
-            if (rend[0] == "1")
-            {
+                string[] col = transforms[7].Split(',');
+                if (col[0] == "1")
+                {
+                    UnityEngine.Color color = new UnityEngine.Color(float.Parse(col[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[2], CultureInfo.InvariantCulture.NumberFormat)
+                        , float.Parse(col[3], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[4], CultureInfo.InvariantCulture.NumberFormat));
+                    gomat.SetColor("_Color", color);
+                }
+                string[] rend = transforms[8].Split(',');
                 if (rend[0] == "1")
                 {
-                    go.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Opaque");
+                    if (rend[0] == "1")
+                    {
+                        gomat.SetOverrideTag("RenderType", "Opaque");
+                    }
+                    else
+                    {
+                        gomat.SetOverrideTag("RenderType", "Transparent");
+                    }
                 }
-                else
-                {
-                    go.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Transparent");
-                }
-            }
+            }   
         }
     }
     private bool loadfunction(BinaryReader binaryReader, ConcurrentQueue<string> loadstring)
@@ -478,7 +501,6 @@ public class heirarchysaveload : MonoBehaviour
                     //PeekChar is supposedly unreliable but try catch blocks are extremely slow when done 1000s of times
                     return false;
                 }
-
             }
             if (twice)
             {
@@ -489,44 +511,55 @@ public class heirarchysaveload : MonoBehaviour
                 string matvalues = "";
                 if (binaryReader.ReadBoolean())
                 {
-                    matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
-                }
-                else
-                {
-                    matvalues = matvalues + "0;";
-                }
-                if (binaryReader.ReadBoolean())
-                {
-                    matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
-                }
-                else
-                {
-                    matvalues = matvalues + "0;";
-                }
-                if (binaryReader.ReadBoolean())
-                {
-                    matvalues = matvalues + "1," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
-                }
-                else
-                {
-                    matvalues = matvalues + "0;";
-                }
-                if (binaryReader.ReadBoolean())
-                {
-                    SByte type = binaryReader.ReadSByte();
-                    if (type == 1)
+                    matvalues = matvalues + "1," + binaryReader.ReadByte() + ";";
+
+                    if (binaryReader.ReadBoolean())
                     {
-                        matvalues = matvalues + "1,1;";
+                        matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
                     }
-                    else if (type == 2)
+                    else
                     {
-                        matvalues = matvalues + "1,2;";
+                        matvalues = matvalues + "0;";
                     }
+                    if (binaryReader.ReadBoolean())
+                    {
+                        matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
+                    }
+                    else
+                    {
+                        matvalues = matvalues + "0;";
+                    }
+                    if (binaryReader.ReadBoolean())
+                    {
+                        matvalues = matvalues + "1," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
+                    }
+                    else
+                    {
+                        matvalues = matvalues + "0;";
+                    }
+                    if (binaryReader.ReadBoolean())
+                    {
+                        SByte type = binaryReader.ReadSByte();
+                        if (type == 1)
+                        {
+                            matvalues = matvalues + "1,1;";
+                        }
+                        else if (type == 2)
+                        {
+                            matvalues = matvalues + "1,2;";
+                        }
+                    }
+                    else
+                    {
+                        matvalues = matvalues + "0;";
+                    }
+
                 }
                 else
                 {
                     matvalues = matvalues + "0;";
                 }
+                
                 string liny = timer + posi + roti + scali + matvalues;
 
                 if (liny != null)
@@ -543,7 +576,7 @@ public class heirarchysaveload : MonoBehaviour
         }
         return true;
     }
-    private void countObjectstracked(GameObject gameObject, string indent, string parentName, List<Tuple<GameObject, bool>> objectstracked, BinaryWriter binarywriter, GameObject allParent)
+    private void countObjectstracked(GameObject gameObject, string indent, string parentName, List<Tuple<GameObject, bool,Byte>> objectstracked, BinaryWriter binarywriter, GameObject allParent)
     {
         if (gameObject.transform.childCount > 0)
         {
