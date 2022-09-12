@@ -32,6 +32,10 @@ public class transformchangedcomp : MonoBehaviour
             {
                 glos = materialprop.GetFloat("_Glossiness");
             }
+            else if (materialprop.HasProperty("_Smoothness"))
+            {
+                glos = materialprop.GetFloat("_Smoothness");
+            }
             if (materialprop.HasProperty("_Color"))
             {
                 color = materialprop.GetColor("_Color");
@@ -45,7 +49,6 @@ public class transformchangedcomp : MonoBehaviour
     }
     void Update()
     {
-
         if (IsThereChangeInGameObject(gameObject.transform, gameObject.activeSelf, position, rotation, scale))
         {
             position = gameObject.transform.position;
@@ -75,15 +78,28 @@ public class transformchangedcomp : MonoBehaviour
                     }
                     meta = mata.GetFloat("_Metallic");
                 }
-                if (glos != -1 && glos != mata.GetFloat("_Glossiness"))
+                if (glos != -1)
                 {
-                    if (!changed)
+                    if (mata.HasProperty("_Glossiness") && glos != mata.GetFloat("_Glossiness"))
                     {
-                        Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
-                        dicri.Add(temp);
-                        changed = true;
+                        if (!changed)
+                        {
+                            Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                            dicri.Add(temp);
+                            changed = true;
+                        }
+                        glos = mata.GetFloat("_Glossiness");
                     }
-                    glos = mata.GetFloat("_Glossiness");
+                    else if(mata.HasProperty("_Smoothness") && glos != mata.GetFloat("_Smoothness"))
+                    {
+                        if (!changed)
+                        {
+                            Tuple<GameObject, bool> temp = new Tuple<GameObject, bool>(gameObject, true);
+                            dicri.Add(temp);
+                            changed = true;
+                        }
+                        glos = mata.GetFloat("_Smoothness");
+                    }
                 }
                 if (color != defaultcol && color != mata.GetColor("_Color"))
                 {

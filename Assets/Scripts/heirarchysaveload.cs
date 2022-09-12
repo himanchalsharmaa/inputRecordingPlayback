@@ -14,6 +14,7 @@ using System.Linq;
 using static GLTFast.Schema.AnimationChannel;
 using System.Collections.Concurrent;
 using System.Drawing;
+using static UnityEditor.Progress;
 //COMMAND+R is replace all occurences
 public class heirarchysaveload : MonoBehaviour
 {
@@ -68,6 +69,10 @@ public class heirarchysaveload : MonoBehaviour
                         if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
                         {
                             matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().material.GetFloat("_Glossiness") + ";";
+                        }
+                        else if (item.Item1.GetComponent<MeshRenderer>().material.HasProperty("_Smoothness"))
+                        {
+                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().material.GetFloat("_Smoothness") + ";";
                         }
                         else
                         {
@@ -418,7 +423,14 @@ public class heirarchysaveload : MonoBehaviour
             string[] gloss = transforms[5].Split(',');
             if (gloss[0] == "1")
             {
-                go.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                if (go.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
+                {
+                    go.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                }
+                else
+                {
+                    go.GetComponent<MeshRenderer>().material.SetFloat("_Smoothness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                }
             }
             string[] col = transforms[6].Split(',');
             if (col[0] == "1")
@@ -457,7 +469,7 @@ public class heirarchysaveload : MonoBehaviour
                     {
                         liny = liny + "," + binaryReader.ReadUInt16();
                     }
-                    loadstring.Enqueue(liny);
+                     loadstring.Enqueue(liny);
                     twice = false;
                     once = false;
                 }
@@ -599,6 +611,11 @@ public class heirarchysaveload : MonoBehaviour
                 binarywriter.Write(true);
                 binarywriter.Write(obj.GetComponent<MeshRenderer>().material.GetFloat("_Glossiness"));
             }
+            else if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Smoothness"))
+            {
+                binarywriter.Write(true);
+                binarywriter.Write(obj.GetComponent<MeshRenderer>().material.GetFloat("_Smoothness"));
+            }
             else
             {
                 binarywriter.Write(false);
@@ -675,7 +692,14 @@ public class heirarchysaveload : MonoBehaviour
             }
             if (binaryreader.ReadBoolean())
             {
-                go.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", binaryreader.ReadSingle());
+                if (go.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
+                {
+                    go.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", binaryreader.ReadSingle());
+                }
+                else
+                {
+                    go.GetComponent<MeshRenderer>().material.SetFloat("_Smoothness", binaryreader.ReadSingle());
+                }
             }
             if (binaryreader.ReadBoolean())
             {

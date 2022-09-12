@@ -14,6 +14,13 @@ public class changematerial : MonoBehaviour
         changeinfo.text = "Beginning change";
         UnityEngine.Color col = new UnityEngine.Color(0,0,1,1);
         tochange.GetComponent<MeshRenderer>().material.SetColor("_Color",col);
+       // Debug.Log(Shader.Find("Mixed Reality Toolkit/Standard")); // MixedRealityToolkit/Standard
+        //List<string> outnames = new List<string>();
+        //tochange.GetComponent<MeshRenderer>().material.GetTexturePropertyNames(outnames);
+        //for (int i = 0; i < outnames.Count; i++)
+        //{
+        //    Debug.Log(outnames[i]);
+        //}
         string res= tochange.GetComponent<MeshRenderer>().material.GetTag("RenderType", false, "N");
         if (res == "Transparent")
         {
