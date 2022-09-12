@@ -34,7 +34,7 @@ public class transformchangedcomp : MonoBehaviour
             gloslist = new float[materialist.Length];
             colorlist = new UnityEngine.Color[materialist.Length];
             reTypelist = new string[materialist.Length];
-            for (Byte i=0;i<materialist.Length;i++) {
+            for (Byte i=0; i<Convert.ToByte(materialist.Length); i++) {
                 Material materialprop = materialist[i];
                 if (materialprop.HasProperty("_Metallic"))
                 {
@@ -86,7 +86,7 @@ public class transformchangedcomp : MonoBehaviour
             if (gameObject.GetComponent<MeshRenderer>())
             {
                 mata = gameObject.GetComponent<MeshRenderer>().materials;
-                for(Byte i = 0; i < mata.Length; i++)
+                for(Byte i = 0; i < Convert.ToByte(mata.Length); i++)
                 {
                     if (reType != "N")
                     {
@@ -160,7 +160,7 @@ public class transformchangedcomp : MonoBehaviour
         else if (gameObject.GetComponent<MeshRenderer>())
         {
             mata = gameObject.GetComponent<MeshRenderer>().materials;
-            for (Byte i = 0; i < mata.Length; i++)
+            for (Byte i = 0; i < Convert.ToByte(mata.Length); i++)
             {
                 if (reType != "N")
                 {

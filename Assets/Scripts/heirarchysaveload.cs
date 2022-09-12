@@ -630,66 +630,69 @@ public class heirarchysaveload : MonoBehaviour
         }
         if (obj.GetComponent<MeshRenderer>())
         {
-            if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Metallic"))
+            Material[] mata = obj.GetComponent<MeshRenderer>().materials;
+            binarywriter.Write(true);
+            binarywriter.Write(Convert.ToByte(mata.Length));
+            for (int i = 0; i < mata.Length; i++) 
             {
-                binarywriter.Write(true);
-                binarywriter.Write(obj.GetComponent<MeshRenderer>().material.GetFloat("_Metallic"));
-            }
-            else
-            {
-                binarywriter.Write(false);
-            }
-            if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
-            {
-                binarywriter.Write(true);
-                binarywriter.Write(obj.GetComponent<MeshRenderer>().material.GetFloat("_Glossiness"));
-            }
-            else if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Smoothness"))
-            {
-                binarywriter.Write(true);
-                binarywriter.Write(obj.GetComponent<MeshRenderer>().material.GetFloat("_Smoothness"));
-            }
-            else
-            {
-                binarywriter.Write(false);
-            }
-            if (obj.GetComponent<MeshRenderer>().material.HasProperty("_Color"))
-            {
-                UnityEngine.Color coli = obj.GetComponent<MeshRenderer>().material.GetColor("_Color");
-                binarywriter.Write(true);
-                binarywriter.Write(coli.r);
-                binarywriter.Write(coli.g);
-                binarywriter.Write(coli.b);
-                binarywriter.Write(coli.a);
-            }
-            else
-            {
-                binarywriter.Write(false);
-            }
-            string result = obj.GetComponent<MeshRenderer>().material.GetTag("RenderType", false, "N");
-            if (result != "N")
-            {
-                if (result == "Opaque")
+                if (mata[i].HasProperty("_Metallic"))
                 {
                     binarywriter.Write(true);
-                    binarywriter.Write(Convert.ToSByte(1));
+                    binarywriter.Write(mata[i].GetFloat("_Metallic"));
                 }
-                if (result == "Transparent")
+                else
+                {
+                    binarywriter.Write(false);
+                }
+                if (mata[i].HasProperty("_Glossiness"))
                 {
                     binarywriter.Write(true);
-                    binarywriter.Write(Convert.ToSByte(2));
+                    binarywriter.Write(mata[i].GetFloat("_Glossiness"));
                 }
-            }
-            else
-            {
-                binarywriter.Write(false);
+                else if (mata[i].HasProperty("_Smoothness"))
+                {
+                    binarywriter.Write(true);
+                    binarywriter.Write(mata[i].GetFloat("_Smoothness"));
+                }
+                else
+                {
+                    binarywriter.Write(false);
+                }
+                if (mata[i].HasProperty("_Color"))
+                {
+                    UnityEngine.Color coli = mata[i].GetColor("_Color");
+                    binarywriter.Write(true);
+                    binarywriter.Write(coli.r);
+                    binarywriter.Write(coli.g);
+                    binarywriter.Write(coli.b);
+                    binarywriter.Write(coli.a);
+                }
+                else
+                {
+                    binarywriter.Write(false);
+                }
+                string result = mata[i].GetTag("RenderType", false, "N");
+                if (result != "N")
+                {
+                    if (result == "Opaque")
+                    {
+                        binarywriter.Write(true);
+                        binarywriter.Write(Convert.ToSByte(1));
+                    }
+                    if (result == "Transparent")
+                    {
+                        binarywriter.Write(true);
+                        binarywriter.Write(Convert.ToSByte(2));
+                    }
+                }
+                else
+                {
+                    binarywriter.Write(false);
+                }
             }
         }
         else
         {
-            binarywriter.Write(false);
-            binarywriter.Write(false);
-            binarywriter.Write(false);
             binarywriter.Write(false);
         }
     }
@@ -721,35 +724,44 @@ public class heirarchysaveload : MonoBehaviour
             }
             if (binaryreader.ReadBoolean())
             {
-                go.GetComponent<MeshRenderer>().material.SetFloat("_Metallic", binaryreader.ReadSingle());
-            }
-            if (binaryreader.ReadBoolean())
-            {
-                if (go.GetComponent<MeshRenderer>().material.HasProperty("_Glossiness"))
+                Byte matcount = binaryreader.ReadByte();
+                for (Byte i=0;i<matcount;i++)
                 {
-                    go.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", binaryreader.ReadSingle());
+                    Material gomat = go.GetComponent<MeshRenderer>().materials[i];
+                    if (binaryreader.ReadBoolean())
+                    {
+                        gomat.SetFloat("_Metallic", binaryreader.ReadSingle());
+                    }
+                    if (binaryreader.ReadBoolean())
+                    {
+                        if (gomat.HasProperty("_Glossiness"))
+                        {
+                            gomat.SetFloat("_Glossiness", binaryreader.ReadSingle());
+                        }
+                        else
+                        {
+                            gomat.SetFloat("_Smoothness", binaryreader.ReadSingle());
+                        }
+                    }
+                    if (binaryreader.ReadBoolean())
+                    {
+                        UnityEngine.Color color = new UnityEngine.Color(binaryreader.ReadSingle(), binaryreader.ReadSingle(), binaryreader.ReadSingle(), binaryreader.ReadSingle());
+                        gomat.SetColor("_Color", color);
+                    }
+                    if (binaryreader.ReadBoolean())
+                    {
+                        SByte type = binaryreader.ReadSByte();
+                        if (type == 1)
+                        {
+                            gomat.SetOverrideTag("RenderType", "Opaque");
+                        }
+                        else
+                        {
+                            gomat.SetOverrideTag("RenderType", "Transparent");
+                        }
+                    }
                 }
-                else
-                {
-                    go.GetComponent<MeshRenderer>().material.SetFloat("_Smoothness", binaryreader.ReadSingle());
-                }
-            }
-            if (binaryreader.ReadBoolean())
-            {
-                UnityEngine.Color color = new UnityEngine.Color(binaryreader.ReadSingle(), binaryreader.ReadSingle(), binaryreader.ReadSingle(), binaryreader.ReadSingle());
-                go.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
-            }
-            if (binaryreader.ReadBoolean())
-            {
-                SByte type = binaryreader.ReadSByte();
-                if (type == 1)
-                {
-                    go.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Opaque");
-                }
-                else
-                {
-                    go.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Transparent");
-                }               
+                
             }
         }
     }
