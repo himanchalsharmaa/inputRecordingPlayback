@@ -88,7 +88,7 @@ public class transformchangedcomp : MonoBehaviour
                 mata = gameObject.GetComponent<MeshRenderer>().materials;
                 for(Byte i = 0; i < Convert.ToByte(mata.Length); i++)
                 {
-                    if (reType != "N")
+                    if (reTypelist[i] != "N")
                     {
                         result = mata[i].GetTag("RenderType", false, "N");
                         if (reTypelist[i] != result)
@@ -162,7 +162,7 @@ public class transformchangedcomp : MonoBehaviour
             mata = gameObject.GetComponent<MeshRenderer>().materials;
             for (Byte i = 0; i < Convert.ToByte(mata.Length); i++)
             {
-                if (reType != "N")
+                if (reTypelist[i] != "N")
                 {
                     result = mata[i].GetTag("RenderType", false, "N");
                     if (reTypelist[i] != result)
