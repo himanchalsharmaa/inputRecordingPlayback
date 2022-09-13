@@ -4,12 +4,19 @@ using UnityEngine;
 using TMPro;
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.MixedReality.Toolkit.UI;
+
+
+
 
 public class changematerial : MonoBehaviour
 {
+    public GameObject nestedObj;
     public GameObject tochange;
     public List<Material> materiallist;
     public TMP_Text changeinfo;
+    public GameObject go;
+    public GameObject goTRS;
 
     public void colorchange()
     {
@@ -34,5 +41,16 @@ public class changematerial : MonoBehaviour
             tochange.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Transparent");
         }
         changeinfo.text = "change done";
+        heirarchysaveload hrs=nestedObj.GetComponent<heirarchysaveload>();
+        GameObject temp=hrs.instantiateRecorded(go,goTRS.transform.position,goTRS.transform.rotation);
+        if (temp != null)
+        {
+            temp.transform.parent = goTRS.transform;
+            temp.AddComponent<ObjectManipulator>();
+        }
+        else
+        {
+            Debug.Log("Object NULL instantiated");
+        }
     }
 }

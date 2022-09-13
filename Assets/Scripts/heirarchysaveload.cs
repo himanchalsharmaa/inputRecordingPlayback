@@ -14,7 +14,7 @@ using System.Linq;
 using static GLTFast.Schema.AnimationChannel;
 using System.Collections.Concurrent;
 using System.Drawing;
-using static UnityEditor.Progress;
+using System.Collections.Specialized;
 //COMMAND+R is replace all occurences
 public class heirarchysaveload : MonoBehaviour
 {
@@ -31,9 +31,10 @@ public class heirarchysaveload : MonoBehaviour
     private FileStream fileStream;
     private ConcurrentQueue<string> infostring;
     private List<Tuple<GameObject, bool, int>> objectstracked;
-    private List<GameObject> spawnedRuntime;
+    private OrderedDictionary spawnedRuntime;
     private Dictionary<string, GameObject> aname;
     private int  depth = 0;
+    private int spawned = 0;
     private bool loaded = true;
     private bool callquits = false;
     private Task diskwrite;
@@ -304,6 +305,7 @@ public class heirarchysaveload : MonoBehaviour
         elapsed = 1f;
         objectstracked = new List<Tuple<GameObject, bool, int>>();
         infostring = new ConcurrentQueue<string>();
+        spawnedRuntime = new OrderedDictionary();
         allParent = nestedObject.transform.parent;
         countObjectstracked(nestedObject, "/", "", objectstracked, binarywriter, nestedObject); // To Attach my script recursively to each child and send objectstrackd to each
         binarywriter.Close();
@@ -338,6 +340,7 @@ public class heirarchysaveload : MonoBehaviour
             fileStream = File.Open(filename, FileMode.Open);
             binaryReader = new BinaryReader(fileStream);
             ConcurrentQueue<string> loadstring = new ConcurrentQueue<string>();
+            spawnedRuntime = new OrderedDictionary();
             try
             {
                 diskread = Task.Factory.StartNew(() => loadfunction(binaryReader, loadstring));
@@ -398,8 +401,16 @@ public class heirarchysaveload : MonoBehaviour
             {
                 for (int x = 2; x < posi.Count(); x++)
                 {
-                    if (Int16.Parse(posi[x]) <= t.childCount)
+                    if (Int16.Parse(posi[x]) < t.childCount)
                     {
+                        t = t.GetChild(Int16.Parse(posi[x]));
+                    }
+                    else
+                    {
+                        go = (GameObject)spawnedRuntime[""+spawned];
+                        GameObject temp=Instantiate(go);
+                        spawned += 1;
+                        temp.transform.parent = t;
                         t = t.GetChild(Int16.Parse(posi[x]));
                     }
                 }
@@ -767,9 +778,20 @@ public class heirarchysaveload : MonoBehaviour
             }
         }
     }
-    public void instantiateRecorded(GameObject go,Vector3 pos,Quaternion rot)
+    public GameObject instantiateRecorded(GameObject go,Vector3 pos,Quaternion rot)
     {
-        spawnedRuntime.Add(Instantiate(go, pos, rot));
+        if (!spawnedRuntime.Contains(go.name)) {
+            GameObject insta = Instantiate(go, pos, rot);
+            transformchangedcomp tfc = insta.AddComponent<transformchangedcomp>();
+            tfc.dicri = objectstracked;
+            spawnedRuntime.Add(go.name,insta);
+            return insta;
+        }
+        else
+        {
+            return null;
+        }
+        
     }
 }
 //private void DumpGameObject(GameObject gameObject, StreamWriter writer, string indent, string parentName,List<string> infostring,float timer)
