@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System;
+using System.Runtime.InteropServices;
 
 public class changematerial : MonoBehaviour
 {
@@ -13,8 +15,9 @@ public class changematerial : MonoBehaviour
     {
         changeinfo.text = "Beginning change";
         UnityEngine.Color col = new UnityEngine.Color(0,0,1,1);
-        tochange.GetComponent<MeshRenderer>().material.SetColor("_Color",col);
-       // Debug.Log(Shader.Find("Mixed Reality Toolkit/Standard")); // MixedRealityToolkit/Standard
+        tochange.GetComponent<MeshRenderer>().materials[0].SetColor("_Color",col);
+        tochange.GetComponent<MeshRenderer>().materials[1].SetColor("_Color", col);
+        // Debug.Log(Shader.Find("Mixed Reality Toolkit/Standard")); // MixedRealityToolkit/Standard
         //List<string> outnames = new List<string>();
         //tochange.GetComponent<MeshRenderer>().material.GetTexturePropertyNames(outnames);
         //for (int i = 0; i < outnames.Count; i++)

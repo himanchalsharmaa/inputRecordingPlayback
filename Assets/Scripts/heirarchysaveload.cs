@@ -30,7 +30,8 @@ public class heirarchysaveload : MonoBehaviour
     private BinaryReader binaryReader;
     private FileStream fileStream;
     private ConcurrentQueue<string> infostring;
-    private List<Tuple<GameObject, bool,Byte>> objectstracked;
+    private List<Tuple<GameObject, bool, int>> objectstracked;
+    private List<GameObject> spawnedRuntime;
     private Dictionary<string, GameObject> aname;
     private int  depth = 0;
     private bool loaded = true;
@@ -301,7 +302,7 @@ public class heirarchysaveload : MonoBehaviour
         fileStream = File.Open(snaploc, FileMode.Create);
         binarywriter = new BinaryWriter(fileStream);
         elapsed = 1f;
-        objectstracked = new List<Tuple<GameObject, bool,Byte>>();
+        objectstracked = new List<Tuple<GameObject, bool, int>>();
         infostring = new ConcurrentQueue<string>();
         allParent = nestedObject.transform.parent;
         countObjectstracked(nestedObject, "/", "", objectstracked, binarywriter, nestedObject); // To Attach my script recursively to each child and send objectstrackd to each
@@ -476,6 +477,7 @@ public class heirarchysaveload : MonoBehaviour
             }   
         }
     }
+    
     private bool loadfunction(BinaryReader binaryReader, ConcurrentQueue<string> loadstring)
     {
         bool once = true;
@@ -576,7 +578,7 @@ public class heirarchysaveload : MonoBehaviour
         }
         return true;
     }
-    private void countObjectstracked(GameObject gameObject, string indent, string parentName, List<Tuple<GameObject, bool,Byte>> objectstracked, BinaryWriter binarywriter, GameObject allParent)
+    private void countObjectstracked(GameObject gameObject, string indent, string parentName, List<Tuple<GameObject, bool, int>> objectstracked, BinaryWriter binarywriter, GameObject allParent)
     {
         if (gameObject.transform.childCount > 0)
         {
@@ -764,6 +766,10 @@ public class heirarchysaveload : MonoBehaviour
                 
             }
         }
+    }
+    public void instantiateRecorded(GameObject go,Vector3 pos,Quaternion rot)
+    {
+        spawnedRuntime.Add(Instantiate(go, pos, rot));
     }
 }
 //private void DumpGameObject(GameObject gameObject, StreamWriter writer, string indent, string parentName,List<string> infostring,float timer)

@@ -8,7 +8,7 @@ public class transformchangedcomp : MonoBehaviour
     private Vector3 position;
     private Vector3 rotation;
     private Vector3 scale;
-    public List<Tuple<GameObject, bool, Byte>> dicri;
+    public List<Tuple<GameObject, bool, int>> dicri;
     float meta = -1, glos = -1;
     private Material[] materialist;
     private float[] metalist;
@@ -34,7 +34,7 @@ public class transformchangedcomp : MonoBehaviour
             gloslist = new float[materialist.Length];
             colorlist = new UnityEngine.Color[materialist.Length];
             reTypelist = new string[materialist.Length];
-            for (Byte i=0; i<Convert.ToByte(materialist.Length); i++) {
+            for (int i=0; i<materialist.Length; i++) {
                 Material materialprop = materialist[i];
                 if (materialprop.HasProperty("_Metallic"))
                 {
@@ -86,14 +86,14 @@ public class transformchangedcomp : MonoBehaviour
             if (gameObject.GetComponent<MeshRenderer>())
             {
                 mata = gameObject.GetComponent<MeshRenderer>().materials;
-                for(Byte i = 0; i < Convert.ToByte(mata.Length); i++)
+                for(int i = 0; i < mata.Length; i++)
                 {
                     if (reTypelist[i] != "N")
                     {
                         result = mata[i].GetTag("RenderType", false, "N");
                         if (reTypelist[i] != result)
                         {
-                            Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool,Byte>(gameObject, true, i);
+                            Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                             dicri.Add(temp);
                             reTypelist[i] = result;
                             changed = true;
@@ -103,7 +103,7 @@ public class transformchangedcomp : MonoBehaviour
                     {
                         if (!changed)
                         {
-                            Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, true, i);
+                            Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                             dicri.Add(temp);
                             changed = true;
                         }
@@ -115,7 +115,7 @@ public class transformchangedcomp : MonoBehaviour
                         {
                             if (!changed)
                             {
-                                Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, true, i);
+                                Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                                 dicri.Add(temp);
                                 changed = true;
                             }
@@ -125,7 +125,7 @@ public class transformchangedcomp : MonoBehaviour
                         {
                             if (!changed)
                             {
-                                Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, true, i);
+                                Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                                 dicri.Add(temp);
                                 changed = true;
                             }
@@ -136,7 +136,7 @@ public class transformchangedcomp : MonoBehaviour
                     {
                         if (!changed)
                         {
-                            Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, true, i);
+                            Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                             dicri.Add(temp);
                             changed = true;
                         }
@@ -144,7 +144,7 @@ public class transformchangedcomp : MonoBehaviour
                     }
                     if (!changed)
                     {
-                        Tuple<GameObject, bool,Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, false,0);
+                        Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, false,0);
                         dicri.Add(temp);
                     }
                     changed = false;
@@ -152,7 +152,7 @@ public class transformchangedcomp : MonoBehaviour
             }
             else
                 {
-                    Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool,Byte>(gameObject, false,0);
+                    Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, false,0);
                     dicri.Add(temp);
                 }
                 changed = false;
@@ -160,14 +160,14 @@ public class transformchangedcomp : MonoBehaviour
         else if (gameObject.GetComponent<MeshRenderer>())
         {
             mata = gameObject.GetComponent<MeshRenderer>().materials;
-            for (Byte i = 0; i < Convert.ToByte(mata.Length); i++)
+            for (int i = 0; i < mata.Length; i++)
             {
                 if (reTypelist[i] != "N")
                 {
                     result = mata[i].GetTag("RenderType", false, "N");
                     if (reTypelist[i] != result)
                     {
-                        Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, true, i);
+                        Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                         dicri.Add(temp);
                         reTypelist[i] = result;
                         changed = true;
@@ -177,7 +177,7 @@ public class transformchangedcomp : MonoBehaviour
                 {
                     if (!changed)
                     {
-                        Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, true, i);
+                        Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                         dicri.Add(temp);
                         changed = true;
                     }
@@ -189,7 +189,7 @@ public class transformchangedcomp : MonoBehaviour
                     {
                         if (!changed)
                         {
-                            Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, true, i);
+                            Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                             dicri.Add(temp);
                             changed = true;
                         }
@@ -199,7 +199,7 @@ public class transformchangedcomp : MonoBehaviour
                     {
                         if (!changed)
                         {
-                            Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, true, i);
+                            Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                             dicri.Add(temp);
                             changed = true;
                         }
@@ -210,7 +210,7 @@ public class transformchangedcomp : MonoBehaviour
                 {
                     if (!changed)
                     {
-                        Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, true, i);
+                        Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, true, i);
                         dicri.Add(temp);
                         changed = true;
                     }
@@ -218,7 +218,7 @@ public class transformchangedcomp : MonoBehaviour
                 }
                 if (!changed)
                 {
-                    Tuple<GameObject, bool, Byte> temp = new Tuple<GameObject, bool, Byte>(gameObject, false, 0);
+                    Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(gameObject, false, 0);
                     dicri.Add(temp);
                 }
                 changed = false;
