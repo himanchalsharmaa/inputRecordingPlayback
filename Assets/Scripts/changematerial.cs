@@ -17,31 +17,15 @@ public class changematerial : MonoBehaviour
     public TMP_Text changeinfo;
     public GameObject go;
     public GameObject goTRS;
+    private heirarchysaveload hrs;
 
+    private void Awake()
+    {
+        hrs = nestedObj.GetComponent<heirarchysaveload>();
+    }
     public void colorchange()
     {
-        changeinfo.text = "Beginning change";
-        UnityEngine.Color col = new UnityEngine.Color(0,0,1,1);
-        tochange.GetComponent<MeshRenderer>().materials[0].SetColor("_Color",col);
-        tochange.GetComponent<MeshRenderer>().materials[1].SetColor("_Color", col);
-        // Debug.Log(Shader.Find("Mixed Reality Toolkit/Standard")); // MixedRealityToolkit/Standard
-        //List<string> outnames = new List<string>();
-        //tochange.GetComponent<MeshRenderer>().material.GetTexturePropertyNames(outnames);
-        //for (int i = 0; i < outnames.Count; i++)
-        //{
-        //    Debug.Log(outnames[i]);
-        //}
-        string res= tochange.GetComponent<MeshRenderer>().material.GetTag("RenderType", false, "N");
-        if (res == "Transparent")
-        {
-            tochange.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Opaque");
-        }
-        else if (res == "Opaque")
-        {
-            tochange.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Transparent");
-        }
-        changeinfo.text = "change done";
-        heirarchysaveload hrs=nestedObj.GetComponent<heirarchysaveload>();
+        tochange.SetActive(true);
         GameObject temp=hrs.instantiateRecorded(go,goTRS.transform.position,goTRS.transform.rotation);
         if (temp != null)
         {
@@ -52,5 +36,31 @@ public class changematerial : MonoBehaviour
         {
             Debug.Log("Object NULL instantiated");
         }
+        StartCoroutine(changecol());
     }
+    IEnumerator changecol()
+    {
+        yield return new WaitForSeconds(3);
+        UnityEngine.Color col = new UnityEngine.Color(0, 0, 1, 1);
+        tochange.GetComponent<MeshRenderer>().materials[0].SetColor("_Color", col);
+        tochange.GetComponent<MeshRenderer>().materials[1].SetColor("_Color", col);
+        changeinfo.text = "Beginning change";
+        string res = tochange.GetComponent<MeshRenderer>().material.GetTag("RenderType", false, "N");
+        if (res == "Transparent")
+        {
+            tochange.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Opaque");
+        }
+        else if (res == "Opaque")
+        {
+            tochange.GetComponent<MeshRenderer>().material.SetOverrideTag("RenderType", "Transparent");
+        }
+        changeinfo.text = "change done";
+        StartCoroutine(waitCor());
+    }
+    IEnumerator waitCor()
+    {
+        yield return new WaitForSeconds(3);
+        hrs.destroyRecorded(tochange);
+    }
+
 }

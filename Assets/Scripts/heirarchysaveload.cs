@@ -21,6 +21,8 @@ public class heirarchysaveload : MonoBehaviour
 {
 
     public GameObject nestedObject;
+    public GameObject toChange;
+    public GameObject toChangeParent;
     private Transform allParent;
     public TMP_Text nestedInfo;
     public TMP_Text loadinfo;
@@ -74,20 +76,21 @@ public class heirarchysaveload : MonoBehaviour
                     depth += 1;
                     path = depth + "," + path;
 
-                    string activity = "";
+                    string activity = ";";
                     if (item.Item3 != -1)
                     {
                         if (item.Item1.activeSelf)
                         {
-                            activity = activity + 1;
+                            activity = activity + "1;";
                         }
                         else
                         {
-                            activity = activity + 0;
+                            activity = activity + "0;";
                         }
+
                         //TRS And Material Logic Begins
 
-                        string posi = ";" + item.Item1.transform.position.x + "," + item.Item1.transform.position.y + "," + item.Item1.transform.position.z + ";";
+                        string posi = item.Item1.transform.position.x + "," + item.Item1.transform.position.y + "," + item.Item1.transform.position.z + ";";
                         string roti = item.Item1.transform.rotation.x + "," + item.Item1.transform.rotation.y + "," + item.Item1.transform.rotation.z + "," + item.Item1.transform.rotation.w + ";";
                         string scaly = item.Item1.transform.localScale.x + "," + item.Item1.transform.localScale.y + "," + item.Item1.transform.localScale.z + ";";
                         string matvalues = "";
@@ -144,7 +147,7 @@ public class heirarchysaveload : MonoBehaviour
                         {
                             matvalues = "0;";
                         }
-                        string towrite = timer + posi + roti + scaly + matvalues;
+                        string towrite = timer + activity +posi + roti + scaly + matvalues;
                         infostring.Enqueue(path);
                         infostring.Enqueue(towrite);
                         depth = 0;
@@ -155,6 +158,8 @@ public class heirarchysaveload : MonoBehaviour
                     {
                         activity = activity + "-1;";
                         depth = 0;
+                        infostring.Enqueue(path);
+                        infostring.Enqueue(timer+activity);
                     }
 
                 }
@@ -219,73 +224,81 @@ public class heirarchysaveload : MonoBehaviour
             infostring.TryDequeue(out b);
             string[] temp2 = b.Split(';');
             binarywriter.Write(float.Parse(temp2[0]));
-            string[] posarr = temp2[1].Split(',');
-            binarywriter.Write(float.Parse(posarr[0]));
-            binarywriter.Write(float.Parse(posarr[1]));
-            binarywriter.Write(float.Parse(posarr[2]));
-            string[] rotarr = temp2[2].Split(',');
-            binarywriter.Write(float.Parse(rotarr[0]));
-            binarywriter.Write(float.Parse(rotarr[1]));
-            binarywriter.Write(float.Parse(rotarr[2]));
-            binarywriter.Write(float.Parse(rotarr[3]));
-            string[] scalearr = temp2[3].Split(',');
-            binarywriter.Write(float.Parse(scalearr[0]));
-            binarywriter.Write(float.Parse(scalearr[1]));
-            binarywriter.Write(float.Parse(scalearr[2]));
-            string[] matnum= temp2[4].Split(',');
-            if (matnum[0] == "1")
+            if (temp2[1] != "-1")
             {
-                binarywriter.Write(true);
-                binarywriter.Write(SByte.Parse(matnum[1]));
+                binarywriter.Write(SByte.Parse(temp2[1]));
+                string[] posarr = temp2[2].Split(',');
+                binarywriter.Write(float.Parse(posarr[0]));
+                binarywriter.Write(float.Parse(posarr[1]));
+                binarywriter.Write(float.Parse(posarr[2]));
+                string[] rotarr = temp2[3].Split(',');
+                binarywriter.Write(float.Parse(rotarr[0]));
+                binarywriter.Write(float.Parse(rotarr[1]));
+                binarywriter.Write(float.Parse(rotarr[2]));
+                binarywriter.Write(float.Parse(rotarr[3]));
+                string[] scalearr = temp2[4].Split(',');
+                binarywriter.Write(float.Parse(scalearr[0]));
+                binarywriter.Write(float.Parse(scalearr[1]));
+                binarywriter.Write(float.Parse(scalearr[2]));
+                string[] matnum = temp2[5].Split(',');
+                if (matnum[0] == "1")
+                {
+                    binarywriter.Write(true);
+                    binarywriter.Write(SByte.Parse(matnum[1]));
 
-                string[] metal = temp2[5].Split(',');
-                if (metal[0] == "1")
-                {
-                    binarywriter.Write(true);
-                    binarywriter.Write(float.Parse(metal[1]));
-                }
-                else
-                {
-                    binarywriter.Write(false);
-                }
-                string[] glos = temp2[6].Split(',');
-                if (glos[0] == "1")
-                {
-                    binarywriter.Write(true);
-                    binarywriter.Write(float.Parse(glos[1]));
-                }
-                else
-                {
-                    binarywriter.Write(false);
-                }
-                string[] col = temp2[7].Split(',');
-                if (col[0] == "1")
-                {
-                    binarywriter.Write(true);
-                    binarywriter.Write(float.Parse(col[1]));
-                    binarywriter.Write(float.Parse(col[2]));
-                    binarywriter.Write(float.Parse(col[3]));
-                    binarywriter.Write(float.Parse(col[4]));
-                }
-                else
-                {
-                    binarywriter.Write(false);
-                }
-                string[] rend = temp2[8].Split(',');
-                if (rend[0] == "1")
-                {
-                    binarywriter.Write(true);
-                    binarywriter.Write(Convert.ToSByte(rend[1]));
-                }
-                else
-                {
-                    binarywriter.Write(false);
-                }
+                    string[] metal = temp2[6].Split(',');
+                    if (metal[0] == "1")
+                    {
+                        binarywriter.Write(true);
+                        binarywriter.Write(float.Parse(metal[1]));
+                    }
+                    else
+                    {
+                        binarywriter.Write(false);
+                    }
+                    string[] glos = temp2[7].Split(',');
+                    if (glos[0] == "1")
+                    {
+                        binarywriter.Write(true);
+                        binarywriter.Write(float.Parse(glos[1]));
+                    }
+                    else
+                    {
+                        binarywriter.Write(false);
+                    }
+                    string[] col = temp2[8].Split(',');
+                    if (col[0] == "1")
+                    {
+                        binarywriter.Write(true);
+                        binarywriter.Write(float.Parse(col[1]));
+                        binarywriter.Write(float.Parse(col[2]));
+                        binarywriter.Write(float.Parse(col[3]));
+                        binarywriter.Write(float.Parse(col[4]));
+                    }
+                    else
+                    {
+                        binarywriter.Write(false);
+                    }
+                    string[] rend = temp2[9].Split(',');
+                    if (rend[0] == "1")
+                    {
+                        binarywriter.Write(true);
+                        binarywriter.Write(Convert.ToSByte(rend[1]));
+                    }
+                    else
+                    {
+                        binarywriter.Write(false);
+                    }
 
+                }
+                else
+                {
+                    binarywriter.Write(false);
+                }
             }
             else
             {
-                binarywriter.Write(false);
+                binarywriter.Write(SByte.Parse(temp2[1]));
             }
             
         }
@@ -372,6 +385,9 @@ public class heirarchysaveload : MonoBehaviour
 
     public async void callload()
     {
+        GameObject tempo = Instantiate(toChange);
+        tempo.transform.parent = toChangeParent.transform;
+        tempo.SetActive(true);
         if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
         {
             if (File.Exists(Application.persistentDataPath + "/snapshot.bin"))
@@ -456,11 +472,11 @@ public class heirarchysaveload : MonoBehaviour
                     }
                     else
                     {
-   
-                        GameObject temp=Instantiate(go);
-                        spawned += 1;
-                        temp.transform.parent = t;
-                        t = t.GetChild(Int16.Parse(posi[x]));
+                        Debug.Log("Can't find gameObject");
+                        //GameObject temp=Instantiate(go);
+                        //spawned += 1;
+                        //temp.transform.parent = t;
+                        //t = t.GetChild(Int16.Parse(posi[x]));
                     }
                 }
                 go = t.gameObject;
@@ -481,60 +497,77 @@ public class heirarchysaveload : MonoBehaviour
                     break;
                 }
             }
-            string[] posarr = transforms[1].Split(',');
-            string[] rotarr = transforms[2].Split(',');
-            string[] scalearr = transforms[3].Split(',');
-            Vector3 pos = new Vector3(float.Parse(posarr[0], CultureInfo.InvariantCulture.NumberFormat),
-                float.Parse(posarr[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(posarr[2], CultureInfo.InvariantCulture.NumberFormat));
-            Quaternion rot = new Quaternion(float.Parse(rotarr[0], CultureInfo.InvariantCulture.NumberFormat), float.Parse(rotarr[1], CultureInfo.InvariantCulture.NumberFormat),
-                float.Parse(rotarr[2], CultureInfo.InvariantCulture.NumberFormat), float.Parse(rotarr[3], CultureInfo.InvariantCulture.NumberFormat));
-            Vector3 scale = new Vector3(float.Parse(scalearr[0], CultureInfo.InvariantCulture.NumberFormat),
-                float.Parse(scalearr[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(scalearr[2], CultureInfo.InvariantCulture.NumberFormat));
-            go.transform.position = pos;
-            go.transform.rotation = rot;
-            go.transform.localScale = scale;
-            string[] matnum = transforms[4].Split(',');
-            Material gomat;
-            if (matnum[0]=="1")
+            int activity = Int16.Parse(transforms[1]);
+            if (activity != -1)
             {
-                gomat = go.GetComponent<MeshRenderer>().materials[Byte.Parse(matnum[1])];
-                string[] metal = transforms[5].Split(',');
-                if (metal[0] == "1")
+                if (activity == 1 && !go.activeSelf)
                 {
-                    gomat.SetFloat("_Metallic", float.Parse(metal[1], CultureInfo.InvariantCulture.NumberFormat));
+                    go.SetActive(true);
                 }
-                string[] gloss = transforms[6].Split(',');
-                if (gloss[0] == "1")
+                else if(activity==0 && go.activeSelf)
                 {
-                    if (gomat.HasProperty("_Glossiness"))
+                    go.SetActive(false);
+                }
+                string[] posarr = transforms[2].Split(',');
+                string[] rotarr = transforms[3].Split(',');
+                string[] scalearr = transforms[4].Split(',');
+                Vector3 pos = new Vector3(float.Parse(posarr[0], CultureInfo.InvariantCulture.NumberFormat),
+                    float.Parse(posarr[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(posarr[2], CultureInfo.InvariantCulture.NumberFormat));
+                Quaternion rot = new Quaternion(float.Parse(rotarr[0], CultureInfo.InvariantCulture.NumberFormat), float.Parse(rotarr[1], CultureInfo.InvariantCulture.NumberFormat),
+                    float.Parse(rotarr[2], CultureInfo.InvariantCulture.NumberFormat), float.Parse(rotarr[3], CultureInfo.InvariantCulture.NumberFormat));
+                Vector3 scale = new Vector3(float.Parse(scalearr[0], CultureInfo.InvariantCulture.NumberFormat),
+                    float.Parse(scalearr[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(scalearr[2], CultureInfo.InvariantCulture.NumberFormat));
+                go.transform.position = pos;
+                go.transform.rotation = rot;
+                go.transform.localScale = scale;
+                string[] matnum = transforms[5].Split(',');
+                Material gomat;
+                if (matnum[0] == "1")
+                {
+                    gomat = go.GetComponent<MeshRenderer>().materials[Byte.Parse(matnum[1])];
+                    string[] metal = transforms[6].Split(',');
+                    if (metal[0] == "1")
                     {
-                        gomat.SetFloat("_Glossiness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                        gomat.SetFloat("_Metallic", float.Parse(metal[1], CultureInfo.InvariantCulture.NumberFormat));
                     }
-                    else
+                    string[] gloss = transforms[7].Split(',');
+                    if (gloss[0] == "1")
                     {
-                        gomat.SetFloat("_Smoothness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                        if (gomat.HasProperty("_Glossiness"))
+                        {
+                            gomat.SetFloat("_Glossiness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                        }
+                        else
+                        {
+                            gomat.SetFloat("_Smoothness", float.Parse(gloss[1], CultureInfo.InvariantCulture.NumberFormat));
+                        }
                     }
-                }
-                string[] col = transforms[7].Split(',');
-                if (col[0] == "1")
-                {
-                    UnityEngine.Color color = new UnityEngine.Color(float.Parse(col[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[2], CultureInfo.InvariantCulture.NumberFormat)
-                        , float.Parse(col[3], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[4], CultureInfo.InvariantCulture.NumberFormat));
-                    gomat.SetColor("_Color", color);
-                }
-                string[] rend = transforms[8].Split(',');
-                if (rend[0] == "1")
-                {
+                    string[] col = transforms[8].Split(',');
+                    if (col[0] == "1")
+                    {
+                        UnityEngine.Color color = new UnityEngine.Color(float.Parse(col[1], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[2], CultureInfo.InvariantCulture.NumberFormat)
+                            , float.Parse(col[3], CultureInfo.InvariantCulture.NumberFormat), float.Parse(col[4], CultureInfo.InvariantCulture.NumberFormat));
+                        gomat.SetColor("_Color", color);
+                    }
+                    string[] rend = transforms[9].Split(',');
                     if (rend[0] == "1")
                     {
-                        gomat.SetOverrideTag("RenderType", "Opaque");
-                    }
-                    else
-                    {
-                        gomat.SetOverrideTag("RenderType", "Transparent");
+                        if (rend[0] == "1")
+                        {
+                            gomat.SetOverrideTag("RenderType", "Opaque");
+                        }
+                        else
+                        {
+                            gomat.SetOverrideTag("RenderType", "Transparent");
+                        }
                     }
                 }
-            }   
+            }
+            else
+            {
+                Destroy(go);
+            }
+             
         }
     }
     
@@ -567,67 +600,75 @@ public class heirarchysaveload : MonoBehaviour
             if (twice)
             {
                 string timer = binaryReader.ReadSingle() + ";";
-                string posi = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
-                string roti = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
-                string scali = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
-                string matvalues = "";
-                if (binaryReader.ReadBoolean())
+                SByte activity = binaryReader.ReadSByte();
+                if (activity != -1)
                 {
-                    matvalues = matvalues + "1," + binaryReader.ReadSByte() + ";";
+                    string acti = activity + ";";
+                    string posi = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
+                    string roti = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
+                    string scali = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
+                    string matvalues = "";
+                    if (binaryReader.ReadBoolean())
+                    {
+                        matvalues = matvalues + "1," + binaryReader.ReadSByte() + ";";
 
-                    if (binaryReader.ReadBoolean())
-                    {
-                        matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
-                    }
-                    else
-                    {
-                        matvalues = matvalues + "0;";
-                    }
-                    if (binaryReader.ReadBoolean())
-                    {
-                        matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
-                    }
-                    else
-                    {
-                        matvalues = matvalues + "0;";
-                    }
-                    if (binaryReader.ReadBoolean())
-                    {
-                        matvalues = matvalues + "1," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
-                    }
-                    else
-                    {
-                        matvalues = matvalues + "0;";
-                    }
-                    if (binaryReader.ReadBoolean())
-                    {
-                        SByte type = binaryReader.ReadSByte();
-                        if (type == 1)
+                        if (binaryReader.ReadBoolean())
                         {
-                            matvalues = matvalues + "1,1;";
+                            matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
                         }
-                        else if (type == 2)
+                        else
                         {
-                            matvalues = matvalues + "1,2;";
+                            matvalues = matvalues + "0;";
                         }
+                        if (binaryReader.ReadBoolean())
+                        {
+                            matvalues = matvalues + "1," + binaryReader.ReadSingle() + ";";
+                        }
+                        else
+                        {
+                            matvalues = matvalues + "0;";
+                        }
+                        if (binaryReader.ReadBoolean())
+                        {
+                            matvalues = matvalues + "1," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
+                        }
+                        else
+                        {
+                            matvalues = matvalues + "0;";
+                        }
+                        if (binaryReader.ReadBoolean())
+                        {
+                            SByte type = binaryReader.ReadSByte();
+                            if (type == 1)
+                            {
+                                matvalues = matvalues + "1,1;";
+                            }
+                            else if (type == 2)
+                            {
+                                matvalues = matvalues + "1,2;";
+                            }
+                        }
+                        else
+                        {
+                            matvalues = matvalues + "0;";
+                        }
+
                     }
                     else
                     {
                         matvalues = matvalues + "0;";
                     }
 
+                    string liny = timer + acti + posi + roti + scali + matvalues;
+                    loadstring.Enqueue(liny);
                 }
                 else
                 {
-                    matvalues = matvalues + "0;";
-                }
-                
-                string liny = timer + posi + roti + scali + matvalues;
-
-                if (liny != null)
-                {
+                    string acti = activity + ";";
+                    string liny = timer + acti;
                     loadstring.Enqueue(liny);
                 }
+                
                 twice = false;
                 once = true;
             }
@@ -887,24 +928,26 @@ public class heirarchysaveload : MonoBehaviour
     }
     public bool destroyRecorded(GameObject go)
     {
+        Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(go, false, -1);
+        objectstracked.Add(temp);
         Destroy(go);
-        string[] values = new string[spawnedRuntime.Count];
-        string[] keys = new string[spawnedRuntime.Count];
-        spawnedRuntime.Values.CopyTo(values, 0);
-        bool found = false;
-        int i = 0;
-        while(i < spawnedRuntime.Count)
-        {
-            if (values[i]==go.name) {
-                found = true;
-                break;
-            }
-            i++;
-        }
-        if (found)
-        {
+        //string[] values = new string[spawnedRuntime.Count];       // Not deleting reference to gameObject in case you re instantiate it, then I will have it in my dictionary
+        //string[] keys = new string[spawnedRuntime.Count];
+        //spawnedRuntime.Values.CopyTo(values, 0);
+        //bool found = false;
+        //int i = 0;
+        //while(i < spawnedRuntime.Count)
+        //{
+        //    if (values[i]==go.name) {
+        //        found = true;
+        //        break;
+        //    }
+        //    i++;
+        //}
+        //if (found)
+        //{
 
-        }
+        //}
         return true;
     }
 }
