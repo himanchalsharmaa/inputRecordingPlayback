@@ -58,71 +58,13 @@ public class heirarchysaveload : MonoBehaviour
             {
                 foreach (var item in objectstracked)
                 {
-                    string posi = ";" + item.Item1.transform.position.x + "," + item.Item1.transform.position.y + "," + item.Item1.transform.position.z + ";";
-                    string roti = item.Item1.transform.rotation.x + "," + item.Item1.transform.rotation.y + "," + item.Item1.transform.rotation.z + "," + item.Item1.transform.rotation.w + ";";
-                    string scaly = item.Item1.transform.localScale.x + "," + item.Item1.transform.localScale.y + "," + item.Item1.transform.localScale.z + ";";
-                    string matvalues = "";
-                    if (item.Item2)
-                    {
-                        matvalues = matvalues + "1," + item.Item3 + ";";
-                        if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Metallic"))
-                        {
-                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetFloat("_Metallic") + ";";
-                        }
-                        else
-                        {
-                            matvalues = matvalues + "0;";
-                        }
-                        if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Glossiness"))
-                        {
-                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetFloat("_Glossiness") + ";";
-                        }
-                        else if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Smoothness"))
-                        {
-                            matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetFloat("_Smoothness") + ";";
-                        }
-                        else
-                        {
-                            matvalues = matvalues + "0;";
-                        }
-                        if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Color"))
-                        {
-                            UnityEngine.Color col = item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetColor("_Color");
-                            matvalues = matvalues + "1," + col.r + "," + col.g + "," + col.b + "," + col.a + ";";
-                        }
-                        else
-                        {
-                            matvalues = matvalues + "0;";
-                        }
-                        string result = item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetTag("RenderType", false, "N");
-                        if (result != "N")
-                        {
-                            if (result == "Opaque")
-                            {
-                                matvalues = matvalues + "1,1;";
-                            }
-                            if (result == "Transparent")
-                            {
-                                matvalues = matvalues + "1,2;";
-                            }
-                        }
-                        else
-                        {
-                            matvalues = matvalues + "0;";
-                        }
-                    }
-                    else
-                    {
-                        matvalues = "0;";
-                    }
-                    string towrite = timer + posi + roti + scaly + matvalues;
                     GameObject obj = item.Item1;
                     string path = "" + obj.transform.GetSiblingIndex();
                     while (obj.transform.parent != allParent)
                     {
                         if (obj.transform.parent == null)
                         {
-                            Debug.Log("Object outside "+allParent.name);
+                            Debug.Log("Object outside " + allParent.name);
                             break;
                         }
                         depth += 1;
@@ -131,9 +73,90 @@ public class heirarchysaveload : MonoBehaviour
                     }
                     depth += 1;
                     path = depth + "," + path;
-                    infostring.Enqueue(path);
-                    infostring.Enqueue(towrite);
-                    depth = 0;
+
+                    string activity = "";
+                    if (item.Item3 != -1)
+                    {
+                        if (item.Item1.activeSelf)
+                        {
+                            activity = activity + 1;
+                        }
+                        else
+                        {
+                            activity = activity + 0;
+                        }
+                        //TRS And Material Logic Begins
+
+                        string posi = ";" + item.Item1.transform.position.x + "," + item.Item1.transform.position.y + "," + item.Item1.transform.position.z + ";";
+                        string roti = item.Item1.transform.rotation.x + "," + item.Item1.transform.rotation.y + "," + item.Item1.transform.rotation.z + "," + item.Item1.transform.rotation.w + ";";
+                        string scaly = item.Item1.transform.localScale.x + "," + item.Item1.transform.localScale.y + "," + item.Item1.transform.localScale.z + ";";
+                        string matvalues = "";
+                        if (item.Item2)
+                        {
+                            matvalues = matvalues + "1," + item.Item3 + ";";
+                            if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Metallic"))
+                            {
+                                matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetFloat("_Metallic") + ";";
+                            }
+                            else
+                            {
+                                matvalues = matvalues + "0;";
+                            }
+                            if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Glossiness"))
+                            {
+                                matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetFloat("_Glossiness") + ";";
+                            }
+                            else if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Smoothness"))
+                            {
+                                matvalues = matvalues + "1" + "," + item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetFloat("_Smoothness") + ";";
+                            }
+                            else
+                            {
+                                matvalues = matvalues + "0;";
+                            }
+                            if (item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].HasProperty("_Color"))
+                            {
+                                UnityEngine.Color col = item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetColor("_Color");
+                                matvalues = matvalues + "1," + col.r + "," + col.g + "," + col.b + "," + col.a + ";";
+                            }
+                            else
+                            {
+                                matvalues = matvalues + "0;";
+                            }
+                            string result = item.Item1.GetComponent<MeshRenderer>().materials[item.Item3].GetTag("RenderType", false, "N");
+                            if (result != "N")
+                            {
+                                if (result == "Opaque")
+                                {
+                                    matvalues = matvalues + "1,1;";
+                                }
+                                if (result == "Transparent")
+                                {
+                                    matvalues = matvalues + "1,2;";
+                                }
+                            }
+                            else
+                            {
+                                matvalues = matvalues + "0;";
+                            }
+                        }
+                        else
+                        {
+                            matvalues = "0;";
+                        }
+                        string towrite = timer + posi + roti + scaly + matvalues;
+                        infostring.Enqueue(path);
+                        infostring.Enqueue(towrite);
+                        depth = 0;
+
+                        // Logic Ends
+                    }
+                    else
+                    {
+                        activity = activity + "-1;";
+                        depth = 0;
+                    }
+
                 }
                 elapsed += Time.deltaTime;
                 objectstracked.Clear();
@@ -213,7 +236,7 @@ public class heirarchysaveload : MonoBehaviour
             if (matnum[0] == "1")
             {
                 binarywriter.Write(true);
-                binarywriter.Write(Byte.Parse(matnum[1]));
+                binarywriter.Write(SByte.Parse(matnum[1]));
 
                 string[] metal = temp2[5].Split(',');
                 if (metal[0] == "1")
@@ -550,7 +573,7 @@ public class heirarchysaveload : MonoBehaviour
                 string matvalues = "";
                 if (binaryReader.ReadBoolean())
                 {
-                    matvalues = matvalues + "1," + binaryReader.ReadByte() + ";";
+                    matvalues = matvalues + "1," + binaryReader.ReadSByte() + ";";
 
                     if (binaryReader.ReadBoolean())
                     {
@@ -819,13 +842,12 @@ public class heirarchysaveload : MonoBehaviour
             return null;
         }
     }
-    public bool changeParentTransform(GameObject toChange,GameObject toChangeTo,Dictionary<string,string> spawnedRuntime)
+    public bool changeParentTransform(GameObject toChange, GameObject toChangeTo, Dictionary<string, GameObject> indextoGameObjects)
     {
-        toChange.transform.parent = toChangeTo.transform;
-        Transform trans=toChangeTo.transform;
-        string path = "" + trans.GetSiblingIndex();
-        int dep = 1;
-        while (trans.parent.transform != nestedObject.transform)
+        Transform trans = toChange.transform;
+        string path1 = "";
+        int dep = 0;
+        while (trans.parent.transform != nestedObject.transform.parent.transform)
         {
             if (trans.parent == null)
             {
@@ -833,10 +855,34 @@ public class heirarchysaveload : MonoBehaviour
                 break;
             }
             dep += 1;
+            path1 = trans.GetSiblingIndex() + "," + path1;
             trans = trans.parent.gameObject.transform;
-            path = trans.GetSiblingIndex() + "," + path;
         }
-        path = dep + "," + path;
+        path1 = dep + "," + path1;
+        GameObject go;
+        if(indextoGameObjects.TryGetValue(path1, out go))
+        {
+            toChange.transform.parent = toChangeTo.transform;
+            trans = toChangeTo.transform;
+            string path2 = "";
+            dep = 0;
+            while (trans.parent.transform != nestedObject.transform.parent.transform)
+            {
+                if (trans.parent == null)
+                {
+                    Debug.Log("816: Object outside " + nestedObject.name);
+                    break;
+                }
+                dep += 1;
+                path2 = trans.GetSiblingIndex() + "," + path2;
+                trans = trans.parent.gameObject.transform;
+            }
+            path2 = dep + "," + path2;
+            indextoGameObjects.Add(path2, go);
+            indextoGameObjects.Remove(path1);
+
+        }
+        
         return true;
     }
     public bool destroyRecorded(GameObject go)

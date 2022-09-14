@@ -9,18 +9,16 @@ public class transformchangedcomp : MonoBehaviour
     private Vector3 rotation;
     private Vector3 scale;
     public List<Tuple<GameObject, bool, int>> dicri;
-    float meta = -1, glos = -1;
     private Material[] materialist;
     private float[] metalist;
     private float[] gloslist;
     private UnityEngine.Color[] colorlist;
     private string[] reTypelist;
-    private Byte materialnum;
-    UnityEngine.Color color;
     UnityEngine.Color defaultcol;
     private Material[] mata;
     string result = "N", reType = "N";
     private bool changed = false;
+    private bool activeSelf;
 
     private void Start()
     {
@@ -30,6 +28,7 @@ public class transformchangedcomp : MonoBehaviour
         if (gameObject.GetComponent<MeshRenderer>())
         {
             materialist = gameObject.GetComponent<MeshRenderer>().materials;
+            activeSelf = gameObject.activeSelf;
             metalist = new float[materialist.Length];
             gloslist = new float[materialist.Length];
             colorlist = new UnityEngine.Color[materialist.Length];
@@ -78,11 +77,12 @@ public class transformchangedcomp : MonoBehaviour
     }
     void Update()
     {
-        if (IsThereChangeInGameObject(gameObject.transform, gameObject.activeSelf, position, rotation, scale))
+        if (IsThereChangeInGameObject(gameObject.transform,activeSelf, position, rotation, scale))
         {
             position = gameObject.transform.position;
             rotation = gameObject.transform.localEulerAngles;
             scale = gameObject.transform.localScale;
+            activeSelf = gameObject.activeSelf;
             if (gameObject.GetComponent<MeshRenderer>())
             {
                 mata = gameObject.GetComponent<MeshRenderer>().materials;
