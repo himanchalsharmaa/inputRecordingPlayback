@@ -45,7 +45,7 @@ public class changematerial : MonoBehaviour
         GameObject temp=hrs.instantiateRecorded(go,goTRS.transform.position,goTRS.transform.rotation);
         if (temp != null)
         {
-            temp.transform.parent = goTRS.transform;
+            //temp.transform.parent = goTRS.transform;
             temp.AddComponent<ObjectManipulator>();
         }
         else

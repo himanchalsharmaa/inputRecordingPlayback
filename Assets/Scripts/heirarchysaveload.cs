@@ -15,9 +15,11 @@ using static GLTFast.Schema.AnimationChannel;
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Collections.Specialized;
+using UnityEditor;
 //COMMAND+R is replace all occurences
 public class heirarchysaveload : MonoBehaviour
 {
+
     public GameObject nestedObject;
     private Transform allParent;
     public TMP_Text nestedInfo;
@@ -31,8 +33,9 @@ public class heirarchysaveload : MonoBehaviour
     private FileStream fileStream;
     private ConcurrentQueue<string> infostring;
     private List<Tuple<GameObject, bool, int>> objectstracked;
-    private OrderedDictionary spawnedRuntime;
+    private Dictionary<string,string> spawnedRuntime;
     private Dictionary<string, GameObject> aname;
+    private List<GameObject> spawnedTrack;
     private int  depth = 0;
     private int spawned = 0;
     private bool loaded = true;
@@ -42,6 +45,7 @@ public class heirarchysaveload : MonoBehaviour
 
     private void Awake()
     { //To set FPS to 60
+      
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
     }
@@ -50,7 +54,7 @@ public class heirarchysaveload : MonoBehaviour
     {
         if (record)
         {
-            if (timer <= (timetocapture + 0.05f))
+            if (timer <= (timetocapture + 0.06f))
             {
                 foreach (var item in objectstracked)
                 {
@@ -116,6 +120,11 @@ public class heirarchysaveload : MonoBehaviour
                     string path = "" + obj.transform.GetSiblingIndex();
                     while (obj.transform.parent != allParent)
                     {
+                        if (obj.transform.parent == null)
+                        {
+                            Debug.Log("Object outside "+allParent.name);
+                            break;
+                        }
                         depth += 1;
                         obj = obj.transform.parent.gameObject;
                         path = obj.transform.GetSiblingIndex() + "," + path;
@@ -143,7 +152,6 @@ public class heirarchysaveload : MonoBehaviour
                 }
                 timer += Time.deltaTime;
             }
-
             else
             {
                 if (infostring.Count > 1)
@@ -167,6 +175,8 @@ public class heirarchysaveload : MonoBehaviour
                 binarywriter.Close();
                 fileStream.Close();
                 objectstracked.Clear();
+                spawnedRuntimeWrite();
+                spawnedRuntime.Clear();
             }
 
         }
@@ -257,7 +267,6 @@ public class heirarchysaveload : MonoBehaviour
             
         }
     }
-
     IEnumerator playroutine(ConcurrentQueue<string> loadstring)
     {
         loadinfo.text = "STARTING LOAD";
@@ -297,6 +306,23 @@ public class heirarchysaveload : MonoBehaviour
             yield return null;
         }
     }
+    private void spawnedRuntimeWrite()
+    {
+        string snaploc = Application.persistentDataPath + "/runtimespawn.txt";
+        fileStream = File.Open(snaploc, FileMode.Create);
+        BinaryWriter binaryWriter = new BinaryWriter(fileStream);
+        string[] keys = new string[spawnedRuntime.Count];
+        string[] values = new string[spawnedRuntime.Count];
+        spawnedRuntime.Keys.CopyTo(keys, 0);
+        spawnedRuntime.Values.CopyTo(values, 0);
+        for (int i = 0; i < spawnedRuntime.Count; i++)
+        {
+            binaryWriter.Write(keys[i] + ";" + values[i]);
+            Debug.Log(keys[i]+";"+ values[i]);
+        }
+        binaryWriter.Close();
+        fileStream.Close();
+    }
     public void storingobj()
     {
         string snaploc = Application.persistentDataPath + "/snapshot.bin";
@@ -305,7 +331,7 @@ public class heirarchysaveload : MonoBehaviour
         elapsed = 1f;
         objectstracked = new List<Tuple<GameObject, bool, int>>();
         infostring = new ConcurrentQueue<string>();
-        spawnedRuntime = new OrderedDictionary();
+        spawnedRuntime = new Dictionary<string,string>();
         allParent = nestedObject.transform.parent;
         countObjectstracked(nestedObject, "/", "", objectstracked, binarywriter, nestedObject); // To Attach my script recursively to each child and send objectstrackd to each
         binarywriter.Close();
@@ -340,7 +366,7 @@ public class heirarchysaveload : MonoBehaviour
             fileStream = File.Open(filename, FileMode.Open);
             binaryReader = new BinaryReader(fileStream);
             ConcurrentQueue<string> loadstring = new ConcurrentQueue<string>();
-            spawnedRuntime = new OrderedDictionary();
+            spawnedRuntime = new Dictionary<string, string>();
             try
             {
                 diskread = Task.Factory.StartNew(() => loadfunction(binaryReader, loadstring));
@@ -407,7 +433,7 @@ public class heirarchysaveload : MonoBehaviour
                     }
                     else
                     {
-                        go = (GameObject)spawnedRuntime[""+spawned];
+   
                         GameObject temp=Instantiate(go);
                         spawned += 1;
                         temp.transform.parent = t;
@@ -780,18 +806,60 @@ public class heirarchysaveload : MonoBehaviour
     }
     public GameObject instantiateRecorded(GameObject go,Vector3 pos,Quaternion rot)
     {
-        if (!spawnedRuntime.Contains(go.name)) {
+        if (!spawnedRuntime.ContainsKey(go.name)) {
             GameObject insta = Instantiate(go, pos, rot);
+            insta.transform.parent = nestedObject.transform;
             transformchangedcomp tfc = insta.AddComponent<transformchangedcomp>();
             tfc.dicri = objectstracked;
-            spawnedRuntime.Add(go.name,insta);
+            spawnedRuntime.Add(""+insta.transform.GetSiblingIndex(),go.name);
             return insta;
         }
         else
         {
             return null;
         }
-        
+    }
+    public bool changeParentTransform(GameObject toChange,GameObject toChangeTo,Dictionary<string,string> spawnedRuntime)
+    {
+        toChange.transform.parent = toChangeTo.transform;
+        Transform trans=toChangeTo.transform;
+        string path = "" + trans.GetSiblingIndex();
+        int dep = 1;
+        while (trans.parent.transform != nestedObject.transform)
+        {
+            if (trans.parent == null)
+            {
+                Debug.Log("816: Object outside " + nestedObject.name);
+                break;
+            }
+            dep += 1;
+            trans = trans.parent.gameObject.transform;
+            path = trans.GetSiblingIndex() + "," + path;
+        }
+        path = dep + "," + path;
+        return true;
+    }
+    public bool destroyRecorded(GameObject go)
+    {
+        Destroy(go);
+        string[] values = new string[spawnedRuntime.Count];
+        string[] keys = new string[spawnedRuntime.Count];
+        spawnedRuntime.Values.CopyTo(values, 0);
+        bool found = false;
+        int i = 0;
+        while(i < spawnedRuntime.Count)
+        {
+            if (values[i]==go.name) {
+                found = true;
+                break;
+            }
+            i++;
+        }
+        if (found)
+        {
+
+        }
+        return true;
     }
 }
 //private void DumpGameObject(GameObject gameObject, StreamWriter writer, string indent, string parentName,List<string> infostring,float timer)
