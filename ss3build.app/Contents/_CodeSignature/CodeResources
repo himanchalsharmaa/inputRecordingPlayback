@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/Data/Managed/Assembly-CSharp.dll</key>
 		<data>
-		0eyf+2lILy6z9ZZTCJCaZOF3uVA=
+		5Z38Fp9suKvzIMgFB99ohzlAiE8=
 		</data>
 		<key>Resources/Data/Managed/Microsoft.MixedReality.Toolkit.Async.dll</key>
 		<data>
@@ -578,7 +578,7 @@
 		</data>
 		<key>Resources/Data/globalgamemanagers</key>
 		<data>
-		Wj9f4taFTR8mMkhVELFBw/Kqdfk=
+		QbrciQzH+WQcyQYMoyLg1sXwlbc=
 		</data>
 		<key>Resources/Data/globalgamemanagers.assets</key>
 		<data>
@@ -590,7 +590,7 @@
 		</data>
 		<key>Resources/Data/resources.assets</key>
 		<data>
-		U6zKil1UOyBUe1kUMC4u5SqJpJc=
+		QE1N2P2ZIAAd+/RwWnd1Z04/ih4=
 		</data>
 		<key>Resources/Data/resources.assets.resS</key>
 		<data>
@@ -598,7 +598,7 @@
 		</data>
 		<key>Resources/Data/sharedassets0.assets</key>
 		<data>
-		2M6oTNyEvyI3yGAbFH+fibXPxuo=
+		fGs2Vw4qHc1L8B6t00pVz5csWH0=
 		</data>
 		<key>Resources/Data/sharedassets0.assets.resS</key>
 		<data>
@@ -784,16 +784,16 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			2BZv8tb16wJWoCaHEivFsnheaXE=
+			oYOePL5MiQVkW+qe17lAJj2SccU=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"d8166ff2d6f5eb0256a02687122bc5b2785e6971" or cdhash H"11294fbae1ba6f23bb4c5bd81a9b6038bf53223e"</string>
+			<string>cdhash H"a1839e3cbe4c8905645bea9ed7b940263d9271c5" or cdhash H"72d818bc5286c50f25dea307aa30cc0179a1ca7c"</string>
 		</dict>
 		<key>Resources/Data/Managed/Assembly-CSharp.dll</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			ez94KaYXI6CGRykoSxtyfuf9oVr+JF5e/1d2+8/JGtk=
+			6rZnkZtV6PmM2l6vN5lcUjMgJzV4TGUuSU3GMT6gx70=
 			</data>
 		</dict>
 		<key>Resources/Data/Managed/Microsoft.MixedReality.Toolkit.Async.dll</key>
@@ -1794,7 +1794,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			9BbAviYv92LswrvK1fdPtcF9FDU9TKdtb6xy3ArYWAk=
+			e9PaE899ISeV9OJwdoZWp/PFYKuc/V81YSkS+aI9QyI=
 			</data>
 		</dict>
 		<key>Resources/Data/globalgamemanagers.assets</key>
@@ -1815,7 +1815,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			4gr+2MEZk+k5exUTVrAscKQBpIodIFBoGjgzAIKLcc0=
+			SzSyaAWgWoSoeMzgYUwUi1+6H9VMe9lPEykokJVb/Hw=
 			</data>
 		</dict>
 		<key>Resources/Data/resources.assets.resS</key>
@@ -1829,7 +1829,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			sH7CIXfg/Il3U+ghlUeC///3AWUDAuftKtsSQVYdTKY=
+			H5kTqIXMcvUVppFJ1nHB+pXYeuJc/QrvaDHzNsPPJWM=
 			</data>
 		</dict>
 		<key>Resources/Data/sharedassets0.assets.resS</key>

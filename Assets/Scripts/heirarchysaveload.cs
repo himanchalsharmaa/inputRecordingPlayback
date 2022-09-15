@@ -319,7 +319,7 @@ public class heirarchysaveload : MonoBehaviour
             
         }
     }
-    IEnumerator playroutine(ConcurrentQueue<string> loadstring)
+    IEnumerator playroutine(ConcurrentQueue<string> loadstring, Dictionary<string,GameObject> loadedGo)
     {
         loadinfo.text = "STARTING LOAD";
         while (true)
@@ -342,7 +342,7 @@ public class heirarchysaveload : MonoBehaviour
                     elapsed = elapsed % 1f;
                     loadinfo.text = "" + timer;
                 }
-                loadingobj(binaryReader, aname, loadstring);
+                loadingobj(binaryReader, aname, loadstring, loadedGo);
                 timer += Time.deltaTime;
             }
             else
@@ -370,7 +370,6 @@ public class heirarchysaveload : MonoBehaviour
         for (int i = 0; i < spawnedRuntime.Count; i++)
         {
             binaryWriter.Write(keys[i] + ";" + values[i]);
-            Debug.Log(keys[i]+";"+ values[i]);
         }
         binaryWriter.Close();
         fileStream.Close();
@@ -401,9 +400,6 @@ public class heirarchysaveload : MonoBehaviour
 
     public async void callload()
     {
-        GameObject tempo = Instantiate(toChange);
-        tempo.transform.parent = toChangeParent.transform;
-        tempo.SetActive(true);
         if (File.Exists(Application.persistentDataPath + "/storeloc.bin"))
         {
             if (File.Exists(Application.persistentDataPath + "/snapshot.bin"))
@@ -414,6 +410,28 @@ public class heirarchysaveload : MonoBehaviour
                 aname = new Dictionary<string, GameObject>();
                 allParent = nestedObject.transform.parent;
                 snapReader(binaryreader);
+                binaryreader.Close();
+                fileStream.Close();
+            }
+            Dictionary<string, GameObject> loadedGo = new Dictionary<string, GameObject>();
+            if (File.Exists(Application.persistentDataPath + "/runtimespawn.txt"))
+            {
+                string runtime = Application.persistentDataPath + "/runtimespawn.txt";
+                fileStream = File.Open(runtime, FileMode.Open);
+                BinaryReader binaryreader = new BinaryReader(fileStream);
+                while (binaryreader.BaseStream.Position != binaryreader.BaseStream.Length)
+                {
+                    string[] entry = binaryreader.ReadString().Split(';');      //            spawnedRuntime.Add("" +insta.transform.GetSiblingIndex(),go.name);
+                    GameObject load = Resources.Load<GameObject>(entry[1]);
+                    if(load != null)
+                    {
+                        loadedGo.Add(entry[0], load);
+                    }
+                    else
+                    {
+                        Debug.Log("Not found resource: " + entry[1]);
+                    }
+                }
                 binaryreader.Close();
                 fileStream.Close();
             }
@@ -434,7 +452,7 @@ public class heirarchysaveload : MonoBehaviour
             }
             if (loaded)
             {
-                StartCoroutine(playroutine(loadstring));
+                StartCoroutine(playroutine(loadstring, loadedGo));
             }
         }
         else
@@ -442,7 +460,7 @@ public class heirarchysaveload : MonoBehaviour
             loadinfo.text = "No load exists";
         }
     }
-    public void loadingobj(BinaryReader reader, Dictionary<string, GameObject> aname, ConcurrentQueue<string> loadstring)
+    public void loadingobj(BinaryReader reader, Dictionary<string, GameObject> aname, ConcurrentQueue<string> loadstring, Dictionary<string, GameObject> loadedGo)
     {
         float timothy1 = 0, timothy2;
         bool oncy = true;
@@ -488,7 +506,16 @@ public class heirarchysaveload : MonoBehaviour
                     }
                     else
                     {
-                        Debug.Log("Can't find gameObject");
+                        if (loadedGo.TryGetValue(line, out go))
+                        {
+                            Instantiate(go).transform.parent = t;
+                            t = t.GetChild(Int16.Parse(posi[x]));
+                        }
+                        else
+                        {
+                            Debug.Log("GameObject not found in resources either: "+ line);
+                        }
+
                         //GameObject temp=Instantiate(go);
                         //spawned += 1;
                         //temp.transform.parent = t;
@@ -672,13 +699,11 @@ public class heirarchysaveload : MonoBehaviour
                         {
                             matvalues = matvalues + "0;";
                         }
-
                     }
                     else
                     {
                         matvalues = matvalues + "0;";
                     }
-
                     string liny = timer + acti + posi + roti + scali + matvalues;
                     loadstring.Enqueue(liny);
                 }
@@ -698,7 +723,6 @@ public class heirarchysaveload : MonoBehaviour
                     }
                     loadstring.Enqueue(path2);
                 }
-                
                 twice = false;
                 once = true;
             }
@@ -905,8 +929,10 @@ public class heirarchysaveload : MonoBehaviour
             insta.transform.parent = nestedObject.transform;
             transformchangedcomp tfc = insta.AddComponent<transformchangedcomp>();
             tfc.dicri = objectstracked;
-            spawnedRuntime.Add(go.name,"" +insta.transform.GetSiblingIndex());
+            spawnedRuntime.Add("2,0," +insta.transform.GetSiblingIndex(),go.name);
             indextoGameObjects.Add("" + insta.transform.GetSiblingIndex(),go);
+            Tuple<GameObject, bool, int, string> temp = new Tuple<GameObject, bool, int, string>(insta, false, 0, "");
+            objectstracked.Add(temp);
             return insta;
         }
         else
@@ -919,7 +945,7 @@ public class heirarchysaveload : MonoBehaviour
         Transform trans1 = toChange.transform;
         string path1 = "";
         int dep = 0;
-        while (trans1.parent.transform != nestedObject.transform.parent.transform)
+        while (trans1.parent.transform != allParent)
         {
             if (trans1.parent == null)
             {
@@ -935,7 +961,7 @@ public class heirarchysaveload : MonoBehaviour
         Transform trans2 = toChangeTo.transform;
         string path2 = "";
         dep = 1;
-        while (trans2.parent.transform != nestedObject.transform.parent.transform)
+        while (trans2.parent.transform != allParent)
         {
             if (trans2.parent == null)
             {

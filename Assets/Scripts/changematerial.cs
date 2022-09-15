@@ -18,6 +18,7 @@ public class changematerial : MonoBehaviour
     public GameObject go;
     public GameObject goTRS;
     private heirarchysaveload hrs;
+    private GameObject temp;
 
     private void Awake()
     {
@@ -26,7 +27,7 @@ public class changematerial : MonoBehaviour
     public void colorchange()
     {
         tochange.SetActive(true);
-        GameObject temp=hrs.instantiateRecorded(go,goTRS.transform.position,goTRS.transform.rotation,hrs.aname);
+        temp=hrs.instantiateRecorded(go,goTRS.transform.position,goTRS.transform.rotation,hrs.aname);
         if (temp != null)
         {
             //temp.transform.parent = goTRS.transform;
@@ -60,7 +61,8 @@ public class changematerial : MonoBehaviour
     IEnumerator waitCor()
     {
         yield return new WaitForSeconds(3);
-        hrs.destroyRecorded(tochange);
+        hrs.destroyRecorded(temp);
+        tochange.SetActive(false);
     }
 
 }
