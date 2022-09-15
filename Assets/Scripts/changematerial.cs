@@ -26,7 +26,7 @@ public class changematerial : MonoBehaviour
     public void colorchange()
     {
         tochange.SetActive(true);
-        GameObject temp=hrs.instantiateRecorded(go,goTRS.transform.position,goTRS.transform.rotation);
+        GameObject temp=hrs.instantiateRecorded(go,goTRS.transform.position,goTRS.transform.rotation,hrs.aname);
         if (temp != null)
         {
             //temp.transform.parent = goTRS.transform;

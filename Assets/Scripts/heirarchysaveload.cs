@@ -34,9 +34,9 @@ public class heirarchysaveload : MonoBehaviour
     private BinaryReader binaryReader;
     private FileStream fileStream;
     private ConcurrentQueue<string> infostring;
-    private List<Tuple<GameObject, bool, int>> objectstracked;
+    private List<Tuple<GameObject, bool, int,string>> objectstracked;
     private Dictionary<string,string> spawnedRuntime;
-    private Dictionary<string, GameObject> aname;
+    public Dictionary<string, GameObject> aname;
     private List<GameObject> spawnedTrack;
     private int  depth = 0;
     private int spawned = 0;
@@ -77,7 +77,7 @@ public class heirarchysaveload : MonoBehaviour
                     path = depth + "," + path;
 
                     string activity = ";";
-                    if (item.Item3 != -1)
+                    if (item.Item3 >= 0)
                     {
                         if (item.Item1.activeSelf)
                         {
@@ -154,12 +154,19 @@ public class heirarchysaveload : MonoBehaviour
 
                         // Logic Ends
                     }
-                    else
+                    else if (item.Item3 == -1)
                     {
                         activity = activity + "-1;";
                         depth = 0;
                         infostring.Enqueue(path);
                         infostring.Enqueue(timer+activity);
+                    }
+                    else if(item.Item3== -2)
+                    {
+                        activity = activity + "-2;";
+                        depth = 0;
+                        infostring.Enqueue(path);
+                        infostring.Enqueue(timer+activity+item.Item4);
                     }
 
                 }
@@ -224,7 +231,20 @@ public class heirarchysaveload : MonoBehaviour
             infostring.TryDequeue(out b);
             string[] temp2 = b.Split(';');
             binarywriter.Write(float.Parse(temp2[0]));
-            if (temp2[1] != "-1")
+            if (temp2[1] == "-1")
+            {
+                binarywriter.Write(SByte.Parse(temp2[1]));
+            }
+            else if (temp2[1] == "-2")
+            {
+                binarywriter.Write(SByte.Parse(temp2[1]));
+                string[] path2 = temp2[2].Split(',');
+                for (int j = 0; j < UInt16.Parse(path2[0]) + 1; j++)
+                {
+                    binarywriter.Write(UInt16.Parse(path2[j]));
+                }
+            }
+            else
             {
                 binarywriter.Write(SByte.Parse(temp2[1]));
                 string[] posarr = temp2[2].Split(',');
@@ -296,10 +316,6 @@ public class heirarchysaveload : MonoBehaviour
                     binarywriter.Write(false);
                 }
             }
-            else
-            {
-                binarywriter.Write(SByte.Parse(temp2[1]));
-            }
             
         }
     }
@@ -365,7 +381,7 @@ public class heirarchysaveload : MonoBehaviour
         fileStream = File.Open(snaploc, FileMode.Create);
         binarywriter = new BinaryWriter(fileStream);
         elapsed = 1f;
-        objectstracked = new List<Tuple<GameObject, bool, int>>();
+        objectstracked = new List<Tuple<GameObject, bool, int,string>>();
         infostring = new ConcurrentQueue<string>();
         spawnedRuntime = new Dictionary<string,string>();
         allParent = nestedObject.transform.parent;
@@ -498,7 +514,7 @@ public class heirarchysaveload : MonoBehaviour
                 }
             }
             int activity = Int16.Parse(transforms[1]);
-            if (activity != -1)
+            if (activity >= 0)
             {
                 if (activity == 1 && !go.activeSelf)
                 {
@@ -563,9 +579,13 @@ public class heirarchysaveload : MonoBehaviour
                     }
                 }
             }
-            else
+            else if(activity == -1)
             {
                 Destroy(go);
+            }
+            else if(activity == -2)
+            {
+                string[] path2 = transforms[2].Split(',');
             }
              
         }
@@ -587,7 +607,7 @@ public class heirarchysaveload : MonoBehaviour
                     {
                         liny = liny + "," + binaryReader.ReadUInt16();
                     }
-                     loadstring.Enqueue(liny);
+                    loadstring.Enqueue(liny);
                     twice = false;
                     once = false;
                 }
@@ -601,7 +621,7 @@ public class heirarchysaveload : MonoBehaviour
             {
                 string timer = binaryReader.ReadSingle() + ";";
                 SByte activity = binaryReader.ReadSByte();
-                if (activity != -1)
+                if (activity >= 0)
                 {
                     string acti = activity + ";";
                     string posi = binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + "," + binaryReader.ReadSingle() + ";";
@@ -662,11 +682,21 @@ public class heirarchysaveload : MonoBehaviour
                     string liny = timer + acti + posi + roti + scali + matvalues;
                     loadstring.Enqueue(liny);
                 }
-                else
+                else if(activity == -1)
                 {
                     string acti = activity + ";";
                     string liny = timer + acti;
                     loadstring.Enqueue(liny);
+                }
+                else if(activity == -2)
+                {
+                    UInt16 deep = binaryReader.ReadUInt16();
+                    string path2 = "" + deep;
+                    for (int j = 0; j < deep; j++)
+                    {
+                        path2 = path2 + "," + binaryReader.ReadUInt16();
+                    }
+                    loadstring.Enqueue(path2);
                 }
                 
                 twice = false;
@@ -679,7 +709,7 @@ public class heirarchysaveload : MonoBehaviour
         }
         return true;
     }
-    private void countObjectstracked(GameObject gameObject, string indent, string parentName, List<Tuple<GameObject, bool, int>> objectstracked, BinaryWriter binarywriter, GameObject allParent)
+    private void countObjectstracked(GameObject gameObject, string indent, string parentName, List<Tuple<GameObject, bool, int,string>> objectstracked, BinaryWriter binarywriter, GameObject allParent)
     {
         if (gameObject.transform.childCount > 0)
         {
@@ -868,14 +898,15 @@ public class heirarchysaveload : MonoBehaviour
             }
         }
     }
-    public GameObject instantiateRecorded(GameObject go,Vector3 pos,Quaternion rot)
+    public GameObject instantiateRecorded(GameObject go,Vector3 pos,Quaternion rot, Dictionary<string, GameObject> indextoGameObjects)
     {
         if (!spawnedRuntime.ContainsKey(go.name)) {
             GameObject insta = Instantiate(go, pos, rot);
             insta.transform.parent = nestedObject.transform;
             transformchangedcomp tfc = insta.AddComponent<transformchangedcomp>();
             tfc.dicri = objectstracked;
-            spawnedRuntime.Add(""+insta.transform.GetSiblingIndex(),go.name);
+            spawnedRuntime.Add(go.name,"" +insta.transform.GetSiblingIndex());
+            indextoGameObjects.Add("" + insta.transform.GetSiblingIndex(),go);
             return insta;
         }
         else
@@ -885,69 +916,79 @@ public class heirarchysaveload : MonoBehaviour
     }
     public bool changeParentTransform(GameObject toChange, GameObject toChangeTo, Dictionary<string, GameObject> indextoGameObjects)
     {
-        Transform trans = toChange.transform;
+        Transform trans1 = toChange.transform;
         string path1 = "";
         int dep = 0;
-        while (trans.parent.transform != nestedObject.transform.parent.transform)
+        while (trans1.parent.transform != nestedObject.transform.parent.transform)
         {
-            if (trans.parent == null)
+            if (trans1.parent == null)
             {
-                Debug.Log("816: Object outside " + nestedObject.name);
+                Debug.Log("901: Object outside the tracked parent: " + nestedObject.name);
                 break;
             }
             dep += 1;
-            path1 = trans.GetSiblingIndex() + "," + path1;
-            trans = trans.parent.gameObject.transform;
+            path1 = trans1.GetSiblingIndex() + "," + path1;
+            trans1 = trans1.parent.gameObject.transform;
         }
         path1 = dep + "," + path1;
         GameObject go;
-        if(indextoGameObjects.TryGetValue(path1, out go))
+        Transform trans2 = toChangeTo.transform;
+        string path2 = "";
+        dep = 1;
+        while (trans2.parent.transform != nestedObject.transform.parent.transform)
         {
-            toChange.transform.parent = toChangeTo.transform;
-            trans = toChangeTo.transform;
-            string path2 = "";
-            dep = 0;
-            while (trans.parent.transform != nestedObject.transform.parent.transform)
+            if (trans2.parent == null)
             {
-                if (trans.parent == null)
-                {
-                    Debug.Log("816: Object outside " + nestedObject.name);
-                    break;
-                }
-                dep += 1;
-                path2 = trans.GetSiblingIndex() + "," + path2;
-                trans = trans.parent.gameObject.transform;
+                Debug.Log("922: Object outside " + nestedObject.name);
+                break;
             }
-            path2 = dep + "," + path2;
-            indextoGameObjects.Add(path2, go);
-            indextoGameObjects.Remove(path1);
-
+            dep += 1;
+            path2 = trans2.GetSiblingIndex() + "," + path2;
+            trans2 = trans2.parent.gameObject.transform;
         }
-        
+        path2 = dep + "," + path2;
+        if(trans1.parent != null && trans2.parent != null)
+        {
+            if(indextoGameObjects.TryGetValue(path1,out go))
+            {
+                path2 = path2 + "," + toChangeTo.transform.childCount;
+                indextoGameObjects.Add(path2, go);
+                indextoGameObjects.Remove(path1);
+                Tuple<GameObject, bool, int, string> temp = new Tuple<GameObject, bool, int, string>(toChange, false, -2, path2);
+                objectstracked.Add(temp);
+                toChange.transform.parent = toChangeTo.transform;
+                Debug.Log("Parent changed and tracking..");
+            }
+            else
+            {
+                Debug.Log("963: Not found Object by key Path1");
+            }
+        }
+        else if (trans2.parent == null)
+        {
+            Debug.Log("Changing the transform but no longer tracking after changing");
+            toChange.transform.parent = toChangeTo.transform;
+            if (indextoGameObjects.ContainsKey(path1))
+            {
+                indextoGameObjects.Remove(path1);
+            }
+        }
+        if (trans2.parent != null && trans1.parent == null)
+        {
+            path2 = path2 + "," + toChangeTo.transform.childCount;
+            Tuple<GameObject, bool, int, string> temp = new Tuple<GameObject, bool, int, string>(toChange, false, -2, path2);
+            objectstracked.Add(temp);
+            toChange.transform.parent = toChangeTo.transform;
+            indextoGameObjects.Add(path2, toChange);
+            Debug.Log("Parent changed and tracking..");
+        }
         return true;
     }
     public bool destroyRecorded(GameObject go)
     {
-        Tuple<GameObject, bool, int> temp = new Tuple<GameObject, bool, int>(go, false, -1);
+        Tuple<GameObject, bool, int, string> temp = new Tuple<GameObject, bool, int, string>(go, false, -1,"");
         objectstracked.Add(temp);
         Destroy(go);
-        //string[] values = new string[spawnedRuntime.Count];       // Not deleting reference to gameObject in case you re instantiate it, then I will have it in my dictionary
-        //string[] keys = new string[spawnedRuntime.Count];
-        //spawnedRuntime.Values.CopyTo(values, 0);
-        //bool found = false;
-        //int i = 0;
-        //while(i < spawnedRuntime.Count)
-        //{
-        //    if (values[i]==go.name) {
-        //        found = true;
-        //        break;
-        //    }
-        //    i++;
-        //}
-        //if (found)
-        //{
-
-        //}
         return true;
     }
 }
