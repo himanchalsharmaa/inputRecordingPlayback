@@ -36,7 +36,7 @@ public class heirarchysaveload : MonoBehaviour
     private ConcurrentQueue<string> infostring;
     private List<Tuple<GameObject, bool, int,string>> objectstracked;
     private Dictionary<string,string> spawnedRuntime;
-    public Dictionary<string, GameObject> aname;
+    public Dictionary<string, GameObject> aname=new Dictionary<string, GameObject>();
     private List<GameObject> spawnedTrack;
     private int  depth = 0;
     private int spawned = 0;
