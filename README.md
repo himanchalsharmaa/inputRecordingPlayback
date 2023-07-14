@@ -11,5 +11,9 @@ A demo of the project showing:
 6. Line renderer being enabled between two points, then those two points are also tracked. (0:18)
 
 Demo of the video:
+
 https://github.com/himanchalsharmaa/inputRecordingPlayback/assets/95272385/a66523fd-a518-402a-816c-be4b2effa95b
 
+Script for input recording service: [https://github.com/himanchalsharmaa/inputRecordingPlayback/blob/master/Assets/Scripts/recordinginput.cs](recordinginput.cs)
+Script for gameObjects to inform the main script of any changes that may happen so they can be tracked: [https://github.com/himanchalsharmaa/inputRecordingPlayback/blob/master/Assets/Scripts/transformchangedcomp.cs](transformchangedcomp.cs)
+The main script where breakdown,storage of data as well as reading and updating happens: [https://github.com/himanchalsharmaa/inputRecordingPlayback/blob/master/Assets/Scripts/heirarchysaveload.cs](heirarchysaveload.cs)
