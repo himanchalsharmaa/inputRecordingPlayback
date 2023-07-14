@@ -10,7 +10,7 @@ A demo of the project showing:
 5. Changes in a parent are also tracked (at 0:16 notice how position of larger cube changes, that is to show changing of parent to another tracked parent)
 6. Line renderer being enabled between two points, then those two points are also tracked. (0:18)
 
-Demo of the video:
+Demo video of recording and playback:
 
 https://github.com/himanchalsharmaa/inputRecordingPlayback/assets/95272385/a66523fd-a518-402a-816c-be4b2effa95b
 
